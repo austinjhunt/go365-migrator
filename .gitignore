@@ -1,0 +1,10 @@
+__pycache__
+venv
+credentials.json
+token.json
+.env
+src/migration-logs
+src/svcaccount_key.json
+pagnotta.json
+staticfiles
+*.sqlite3

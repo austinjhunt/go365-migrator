@@ -1,0 +1,120 @@
+:root {
+  --google-yellow: #fbbc05;
+  --google-red: #ea4335;
+  --google-blue: #4285f4;
+  --google-green: #34a853;
+
+  --microsoft-green: #7fbc00;
+  --microsoft-red: #f34f1c;
+  --microsoft-yellow: #ffba01;
+  --microsoft-blue: #01a6f0;
+  --microsoft-grey: #747474;
+}
+body {
+  background: linear-gradient(
+    -45deg,
+    #688e26,
+    #0b0014,
+    #f2a541,
+    #b75d69,
+    #320a28
+  );
+  background-size: 400% 400%;
+  animation: gradient 60s ease infinite;
+  font-family: Galvji;
+}
+
+.bg-google-blue {
+  background-color: var(--google-blue);
+}
+.bg-google-green {
+  background-color: var(--google-green);
+}
+.bg-google-yellow {
+  background-color: var(--google-yellow);
+}
+.bg-google-red {
+  background-color: var(--google-red);
+}
+
+.bg-microsoft-yellow {
+  background-color: var(--microsoft-yellow);
+}
+.bg-microsoft-green {
+  background-color: var(--microsoft-green);
+}
+.bg-microsoft-grey {
+  background-color: var(--microsoft-grey);
+}
+.bg-microsoft-blue {
+  background-color: var(--microsoft-blue);
+}
+.bg-microsoft-red {
+  background-color: var(--microsoft-red);
+}
+
+/* Brand */
+
+.custombrand {
+  background-color: #212529;
+  font-family: Galvji;
+  font-size: 25px;
+  text-transform: uppercase;
+}
+
+textarea {
+  min-height: 200px;
+}
+
+input:disabled,
+textarea:disabled {
+  background-color: aliceblue !important;
+}
+
+.custombrand > span {
+  margin: -3px;
+}
+
+.custombrand > span:nth-child(1) {
+  color: var(--google-blue);
+}
+
+.custombrand > span:nth-child(2) {
+  color: var(--google-green);
+}
+.custombrand > span:nth-child(3) {
+  color: var(--google-yellow);
+}
+.custombrand > span:nth-child(4) {
+  color: var(--google-red);
+}
+
+.custombrand > span:nth-child(5) {
+  color: var(--google-blue);
+}
+
+.custombrand > span:nth-child(6) {
+  color: var(--google-yellow);
+}
+
+.custombrand > span:nth-last-child(3) {
+  color: var(--microsoft-green);
+}
+.custombrand > span:nth-last-child(2) {
+  color: var(--microsoft-red);
+}
+.custombrand > span:nth-last-child(1) {
+  color: var(--microsoft-yellow);
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
