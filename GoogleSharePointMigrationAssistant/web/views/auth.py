@@ -1,17 +1,19 @@
 from django.views.generic import FormView, View
 from django.utils.safestring import mark_safe
-from ..forms import *
-
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import redirect, render
+from ..forms.auth import *
+from ..models import Profile 
 
 class CustomLoginView(FormView):
-    template_name = 'accounts/login.html'
+    template_name = 'auth/login.html'
     form_class = LoginForm
     success_url = '/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = self.form_class()
-        context['searchheader'] = False
         if "next=" in self.request.get_full_path():
             next_url = self.request.get_full_path().split("next=")[-1]
         else:
@@ -44,14 +46,13 @@ class CustomLoginView(FormView):
 
 class SignUpView(FormView):
     form_class = SignupForm
-    template_name = 'accounts/signup.html'
+    template_name = 'auth/signup.html'
     success_url = '/'
     # On GET /signup, send to template_name with new form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = self.form_class()
-        context['searchheader'] = False
         return context
 
     def form_valid(self, form):
@@ -81,10 +82,7 @@ class SignUpView(FormView):
             self.request,
             template_name=self.template_name,
             context={
-                'login_form': LoginForm(),
-                'signup_form': form,
-                # Maintain the same context provided in IndexView since this view goes to same page
-                'search_form': SearchPapersForm(),
+                'form': form,
             }
         )
 

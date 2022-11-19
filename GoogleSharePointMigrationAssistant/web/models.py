@@ -3,13 +3,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
-
 class Profile(models.Model):
-    class Meta:
-        app_label = 'google_to_sharepoint_migration_app'
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     timezone = models.CharField(max_length=100, default="UTC")
-
 
 class Migration(models.Model):
     """ Store migration records for users """
@@ -21,7 +17,6 @@ class Migration(models.Model):
     total_size = models.CharField(max_length=32, default='0')
     start_timestamp = models.DateTimeField(auto_now_add=True)
     end_timestamp = models.DateTimeField()
-
 
 class AdministrationSettings(models.Model):
     google_oauth_client_id = models.CharField(max_length=100)

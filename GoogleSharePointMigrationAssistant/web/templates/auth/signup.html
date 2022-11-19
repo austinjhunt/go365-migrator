@@ -1,0 +1,40 @@
+{% extends 'include/master.html' %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-sm-8">
+    <div class="col-md-6 card mx-auto" style="width: 560px">
+      <div class="card-header">
+        <h3 class="card-title text-dark">Sign up</h3>
+      </div>
+      <div class="card-body">
+        <div class="col-sm-12 login-form text-dark">
+          <div class="col-lg-12 login-form text-center">
+            <form method="post">
+              {% csrf_token %} {{form.non_field_errors}}
+              <div class="form-floating mb-3 text-dark">
+                {{ form.username }} {% if form.username.errors %} {{
+                form.username.errors}} {% endif %}
+                <label for="signupUsername">{{ form.username.label }}</label>
+              </div>
+              <div class="form-floating mb-3 text-dark">
+                {{ form.password1 }} {% if form.password1.errors %} {{
+                form.password1.errors}} {% endif %}
+                <label for="signupPassword">{{ form.password1.label }}</label>
+              </div>
+              <div class="form-floating text-dark">
+                {{ form.password2 }} {% if form.password2.errors %} {{
+                form.password2.errors}} {% endif %}
+                <label for="signupPasswordConfirm"
+                  >{{ form.password2.label }}</label
+                >
+              </div>
+              <button type="submit" class="btn btn-lg btn-primary mt-3">
+                Sign Up
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

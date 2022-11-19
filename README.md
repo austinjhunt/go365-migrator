@@ -144,3 +144,13 @@ The following models are used by this web application:
 ## Setup / Administration
 
 I'm making a point to map all of the authentication-related configuration variables to database fields such that an admin for the application can open the admin dashboard and set all of the settings easily without having to place a JSON file into a specific path of the project before starting it (i.e., the credentials file you download when setting up a Google OAuth client). Ultimately the administrative config variables should be modifiable by admins from the front end.
+
+## Usage
+
+1. Get started, brings you to Create Migration page.
+2. Log into Google, authorize migration app via Google OAuth.
+3. Log into O365, authorize migration app via Azure App Registration OAuth.
+4. Select one Google source file/folder/shared drive.
+5. Select one SharePoint / OneDrive destination.
+6. Enqueue migration.
+7. View activity of migration as it is happening. Able to see if it has started. If using a queue (not decided on implementation yet), display how many migration jobs are ahead of your own. IDEAL: trigger migration would spin up a new AWS lambda for running migration process along with new EC2 instance for housing the intermediary files since they need to be first downloaded before reuploading to destination.

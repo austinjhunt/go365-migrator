@@ -1,0 +1,36 @@
+{% extends 'include/master.html' %} {% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-sm-8">
+    <div class="card mx-auto" style="width: 560px">
+      <div class="card-header">
+        <h3 class="card-title text-dark">Log in</h3>
+      </div>
+      <div class="card-body">
+        <div class="col-sm-12 login-form text-dark">
+          <div class="col-lg-12 login-form text-center">
+            <form method="post">
+              {% csrf_token %} {{ form.non_field_errors }}
+              <input type="hidden" name="next" value="{{next}}" />
+              <div class="form-floating mb-3 text-dark">
+                {{ form.username }} {% if form.username.errors %} {{
+                form.username.errors}} {% endif %}
+                <label for="loginUsername">{{form.username.label }}</label>
+              </div>
+              <div class="form-floating text-dark">
+                {{form.password }} {% if form.password.errors %}
+                {{form.password.errors}} {% endif %}
+                <label for="loginPassword">{{ form.password.label }}</label>
+              </div>
+              <button type="submit" class="btn btn-lg btn-primary mt-3">
+                Log in
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

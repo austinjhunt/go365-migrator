@@ -1,10 +1,33 @@
 <nav class="container">
-    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <a class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 site-title" href="/">GSP
-            Migration
-            Assistant</a>
-        <a href="/login/" class="btn btn-outline-light me-2">Log In</a>
-        <a href="/signup/" class="btn btn-outline-light me-2">Sign Up</a>
-
-    </div>
+  <div
+    class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"
+  >
+    <a
+      class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 site-title"
+      href="/"
+      >GSP Migration Assistant</a
+    >
+    {% if not user.is_authenticated %}
+    <a
+      href="{% url 'login' %}"
+      title="log in if you already have an account"
+      class="btn btn-outline-light me-2"
+      >Log In</a
+    >
+    <a
+      href="{% url 'signup' %}"
+      title="sign up. create an account"
+      class="btn btn-outline-light me-2"
+      >Sign Up</a
+    >
+    {% else %}
+    <span class="d-inline-block me-3">{{user.username}}</span>
+    <a
+      href="{% url 'logout' %}"
+      title="log out"
+      class="btn btn-outline-light me-2"
+      >Log Out</a
+    >
+    {% endif %}
+  </div>
 </nav>

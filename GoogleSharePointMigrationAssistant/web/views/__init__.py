@@ -1,3 +1,4 @@
 """ Views for web application"""
-from .accountmgmt import SignUpView, CustomLoginView, LogoutView
+from .auth import SignUpView, CustomLoginView, LogoutView
 from .base import HomeView
+from .migrations import CreateMigrationView
