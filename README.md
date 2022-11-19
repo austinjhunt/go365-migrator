@@ -114,9 +114,13 @@ To provide a map of your migration sources and destinations, use a `map.json` fi
 ]
 ```
 
+## Environment Variables / Secrets
+
+To avoid including secret values in the repository while still allowing for the possibility of collaboration on a fairly large scale project, I've written [lastpass-pull-env.py](lastpass-pull-env.py) that uses the LastPass SDK to pull the contents of a (possibly shared) secure note into a local .gitignored .env file. To use this approach, store the note as `.env` inside a specific folder, e.g., "GITIGNORED\googleproject". Run the script, authenticate, and provide that folder path.
+
 ## Running
 
-Once you have copied the `.env-template` file to your own `.env` file and have populated the environment variables with your own unique values, and you have your `map.json` file set up with your own migration maps (as defined above), you can run the project with
+Once you have populated the environment variables with your own unique values, and you have your `map.json` file set up with your own migration maps (as defined above), you can run the project with
 
 ```
 python migrationassistant.py
