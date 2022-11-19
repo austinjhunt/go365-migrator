@@ -127,3 +127,15 @@ python migrationassistant.py
 ```
 
 This will log both to standard output and to log files in a created `migration-logs` directory.
+
+# The Django Web App
+
+![screenshot of migration assistant web app homepage](img/gsp-migrate-homepage.jpg)
+
+## Models
+
+## Setup / Administration
+
+I'm making a point to map all of the authentication-related configuration variables to database fields such that an admin for the application can open the admin dashboard and set all of the settings easily without having to place a JSON file into a specific path of the project before starting it (i.e., the credentials file you download when setting up a Google OAuth client). Ultimately the administrative config variables should be modifiable by admins from the front end.
+
+##
