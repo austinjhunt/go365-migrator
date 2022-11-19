@@ -19,6 +19,8 @@ class Migration(models.Model):
     num_files = models.IntegerField(default=0)
     num_folders = models.IntegerField(default=0)
     total_size = models.CharField(max_length=32, default='0')
+    start_timestamp = models.DateTimeField(auto_now_add=True)
+    end_timestamp = models.DateTimeField()
 
 
 class AdministrationSettings(models.Model):

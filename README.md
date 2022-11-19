@@ -134,8 +134,13 @@ This will log both to standard output and to log files in a created `migration-l
 
 ## Models
 
+The following models are used by this web application:
+
+- Profile (extension of the default User model via a one-to-one map; this is common with Django projects).
+- Migration. We obviously want to provide users and admins with the ability to view a record of completed migrations. Users should be able to see their own migrations, and admins should be able to see all migrations. Each migration is tied to the User that triggered it via foreign key mapping to the User model. Migration objects are to be created when the migration is triggered. Upon completion, attributes related to the amount of data migrated and the amount of time it took to complete are updated.
+- AdministrationSettings (discussed [below](#setup--administration))
+- AdminstrationSettings_ListAttributeItem. This table is used to house values of list attributes for the administration settings. For example, part of the Google OAuth config specifies lists of redirect URIs and JS origins, but there's not a great way of storing lists as model fields. So, this model allows each list item to be stored as an object tying back to the core admin settings object. Relational databases can be fun...
+
 ## Setup / Administration
 
 I'm making a point to map all of the authentication-related configuration variables to database fields such that an admin for the application can open the admin dashboard and set all of the settings easily without having to place a JSON file into a specific path of the project before starting it (i.e., the credentials file you download when setting up a Google OAuth client). Ultimately the administrative config variables should be modifiable by admins from the front end.
-
-##
