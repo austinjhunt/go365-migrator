@@ -1,0 +1,49 @@
+.loader_container_wrapper {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  z-index: 5;
+  background: linear-gradient(-45deg, $google-blue, $google-green, $google-yellow, $google-red, $ms-yellow, $ms-blue);
+  background-size: 400% 400%;
+  animation: gradient 60s ease infinite;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .loader {
+    background: currentcolor;
+    position: relative;
+    animation: loading 1s ease-in-out infinite;
+    animation-delay: 0.4s;
+    width: 1rem;
+    height: 3rem;
+    margin: 0 1rem;
+    &:after,
+    &:before {
+      content: "";
+      position: absolute;
+      width: inherit;
+      height: inherit;
+      background: inherit;
+      animation: inherit;
+    }
+    &:before {
+      right: 2rem;
+      animation-delay: 0.2s;
+    }
+    &:after {
+      left: 2rem;
+      animation-delay: 0.6s;
+    }
+  }
+}
+
+@keyframes loading {
+  0%,
+  100% {
+    box-shadow: 0 0 0 currentcolor, 0 0 0 currentcolor;
+  }
+  50% {
+    box-shadow: 0 -0.25em 0 currentcolor, 0 0.25em 0 currentcolor;
+  }
+}
