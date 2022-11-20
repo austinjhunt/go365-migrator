@@ -6,6 +6,8 @@
 ## Web App
 
 - DNS
-- Linode, or EC2 instance
+- Linode, or EC2 instance...
 - Twilio MSGing service with callback
 - AWS EC2 & lambda provisioning?
+- Change Admin settings form to use password inputs
+- Change admin settings to use list component for list items, e.g. js origins and redirect URIs
