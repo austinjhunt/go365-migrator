@@ -4,11 +4,17 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
 class Profile(models.Model):
+    class Meta: 
+        verbose_name = 'Profile'
+        verbose_name_plural = 'Profiles'
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     timezone = models.CharField(max_length=100, default="UTC")
 
 class Migration(models.Model):
     """ Store migration records for users """
+    class Meta: 
+        verbose_name = 'Migration'
+        verbose_name_plural = 'Migrations'
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     lastmod = models.DateTimeField(auto_now=True)
@@ -19,6 +25,9 @@ class Migration(models.Model):
     end_timestamp = models.DateTimeField()
 
 class AdministrationSettings(models.Model):
+    class Meta:
+        verbose_name = 'Administration Settings'
+        verbose_name_plural = 'Administration Settings'
     # For OAuth-driven migrations (user-driven)
     google_oauth_client_id = models.CharField(max_length=100, null=True, blank=True, verbose_name='Google Service Account - Client ID')
     google_oauth_project_id = models.CharField(max_length=50, verbose_name='Google Service Account - Project ID')
@@ -50,6 +59,9 @@ class AdministrationSettings(models.Model):
 
 
 class AdministrationSettings_ListAttributeItem(models.Model):
+    class Meta:
+        verbose_name = 'Administration Settings List Attribute Item'
+        verbose_name_plural = 'Administration Settings List Attribute Items'
     """ Cannot really store a list of strings well in a single column so 
     this handles storage of list attributes for administration settings. Store each 
     as separate object linking back to admin settings via foreign key. """
