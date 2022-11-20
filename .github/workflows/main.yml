@@ -1,0 +1,11 @@
+name: Testing
+on: [pull_request, push]
+jobs:
+  testing_project:
+    runs-on: ubuntu-latest # operating system your code will run on
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - run: pip install -r requirements.txt # install all our dependencies for the project
+      - run: cd GoogleSharePointMigrationAssistant
+      - run: python manage.py test
