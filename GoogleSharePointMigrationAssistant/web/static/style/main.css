@@ -304,28 +304,5 @@ footer .site-desc {
     box-shadow: 0 -0.25em 0 currentcolor, 0 0.25em 0 currentcolor;
   }
 }
-.page-header {
-  padding-top: 6px;
-  margin-bottom: 20px;
-}
-
-nav .site-title {
-  font-weight: 500;
-  margin-top: 8px;
-  padding: 0;
-  margin-left: 0;
-  margin-right: 32px;
-  flex: 0 0 auto;
-  font-size: 1.5em;
-  border: none;
-  text-shadow: 0px 0px 5px black, 0px 0px 10px black;
-  color: #fff;
-  opacity: 1;
-}
-nav .site-title:hover {
-  opacity: 0.75;
-  color: white;
-  transition: opacity 0.25s ease-in-out, border 0.25s ease-in-out;
-}
 
 /*# sourceMappingURL=main.css.map */

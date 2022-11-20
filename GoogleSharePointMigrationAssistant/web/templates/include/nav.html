@@ -1,39 +1,56 @@
-<nav class="container">
-  <div
-    class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"
+<nav class="navbar navbar-expand-lg">
+  <a class="navbar-brand text-light" href="#">GSP Migration Assistant</a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
   >
-    <a
-      class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 site-title"
-      href="/"
-      >GSP Migration Assistant</a
-    >
-    {% if not user.is_authenticated %}
-    <a
-      href="{% url 'login' %}"
-      title="log in if you already have an account"
-      class="btn btn-outline-light me-2"
-      >Log In</a
-    >
-    <a
-      href="{% url 'signup' %}"
-      title="sign up. create an account"
-      class="btn btn-outline-light me-2"
-      >Sign Up</a
-    >
-    {% else %}
-    <span class="d-inline-block me-3">{{user.username}}</span>
-    <a
-      href="{% url 'list-migrations' %}"
-      title="view all of your migrations"
-      class="btn btn-outline-light me-2"
-      >Migrations</a
-    >
-    <a
-      href="{% url 'logout' %}"
-      title="log out"
-      class="btn btn-outline-light me-2"
-      >Log Out</a
-    >
-    {% endif %}
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ms-auto">
+      {% if not user.is_authenticated %}
+      <li class="nav-item">
+        <a
+          href="{% url 'login' %}"
+          title="log in if you already have an account"
+          class="btn btn-outline-light me-2 nav-link text-light"
+          >Log In</a
+        >
+      </li>
+      <li class="nav-item">
+        <a
+          href="{% url 'signup' %}"
+          title="sign up. create an account"
+          class="btn btn-outline-light me-2 nav-link text-light"
+          >Sign Up</a
+        >
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <span class="d-inline-block me-3 nav-link">{{user.username}}</span>
+      </li>
+      <li class="nav-item">
+        <a
+          href="{% url 'list-migrations' %}"
+          title="view all of your migrations"
+          class="btn btn-outline-light me-2 nav-link text-light"
+          >Migrations</a
+        >
+      </li>
+      <li class="nav-item">
+        <a
+          href="{% url 'logout' %}"
+          title="log out"
+          class="btn btn-outline-light me-2 nav-link text-light"
+          >Log Out</a
+        >
+      </li>
+      {% endif %}
+    </ul>
   </div>
 </nav>
