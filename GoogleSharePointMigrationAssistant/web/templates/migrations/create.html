@@ -1,36 +1,25 @@
 {% extends 'include/master.html' %} {% block content %}
-
-<div class="row justify-content-center">
-  <div class="col-sm-8">
-    <div class="card mx-auto" style="width: 560px">
-      <div class="card-header">
-        <h3 class="card-title text-dark">Log in</h3>
-      </div>
-      <div class="card-body">
-        <div class="col-sm-12 login-form text-dark">
-          <div class="col-lg-12 login-form text-center">
-            <form method="post">
-              {% csrf_token %} {{ form.non_field_errors }}
-              <input type="hidden" name="next" value="{{next}}" />
-              <div class="form-floating mb-3 text-dark">
-                {{ form.username }} {% if form.username.errors %} {{
-                form.username.errors}} {% endif %}
-                <label for="loginUsername">{{form.username.label }}</label>
-              </div>
-              <div class="form-floating text-dark">
-                {{form.password }} {% if form.password.errors %}
-                {{form.password.errors}} {% endif %}
-                <label for="loginPassword">{{ form.password.label }}</label>
-              </div>
-              <button type="submit" class="btn btn-lg btn-primary mt-3">
-                Log in
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="container">
+  <ol class="list-group">
+    <li class="list-group-item active">
+      Sign into Google and authorize this application to access your Google data
+      via Google OAuth.
+    </li>
+    <li class="list-group-item">
+      Log into Microsoft 365 and authorize this application to access your
+      OneDrive and SharePoint content via Azure OAuth.
+    </li>
+    <li class="list-group-item">
+      Select a source file, folder, or shared drive from your Google Drive. This
+      selection is the data that will be migrated.
+    </li>
+    <li class="list-group-item">
+      Select a destination in your OneDrive account or in SharePoint (e.g., a
+      Document Library on a SharePoint site). This is the destination to which
+      your selected Google source will be migrated.
+    </li>
+    <li class="list-group-item">Enqueue migration and monitor its progress.</li>
+  </ol>
 </div>
 
 {% endblock %}

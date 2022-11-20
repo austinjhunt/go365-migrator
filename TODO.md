@@ -11,3 +11,4 @@
 - AWS EC2 & lambda provisioning?
 - Change Admin settings form to use password inputs
 - Change admin settings to use list component for list items, e.g. js origins and redirect URIs
+- establish ordered steps flow for setting up migration

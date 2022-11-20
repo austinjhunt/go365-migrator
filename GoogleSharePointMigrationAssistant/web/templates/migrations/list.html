@@ -1,0 +1,24 @@
+{% extends 'include/master.html' %} {% block content %}
+<div class="container">
+  <div class="row">
+    {% if migrations %} {% for migration in migrations %}
+    <div class="col-sm-12"></div>
+
+    {% endfor %} {% else %}
+    <div class="col-sm-12 text-center">
+      <p class="lead">
+        You currently do not have any active or queued data migrations
+      </p>
+      <a
+        href="{% url 'create-migration' %}"
+        title="Create a new migration"
+        class="btn btn-success"
+      >
+        <i class="fa fa-plus"></i> Create Migration</a
+      >
+    </div>
+
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -23,6 +23,12 @@
     {% else %}
     <span class="d-inline-block me-3">{{user.username}}</span>
     <a
+      href="{% url 'list-migrations' %}"
+      title="view all of your migrations"
+      class="btn btn-outline-light me-2"
+      >Migrations</a
+    >
+    <a
       href="{% url 'logout' %}"
       title="log out"
       class="btn btn-outline-light me-2"
