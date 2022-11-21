@@ -11,18 +11,18 @@
             <form method="post">
               {% csrf_token %} {{form.non_field_errors}}
               <div class="form-floating mb-3 text-dark">
-                {{ form.username }} {% if form.username.errors %} {{
-                form.username.errors}} {% endif %}
+                {{form.username}} {% if form.username.errors %}
+                {{form.username.errors}} {% endif %}
                 <label for="signupUsername">{{ form.username.label }}</label>
               </div>
               <div class="form-floating mb-3 text-dark">
-                {{ form.password1 }} {% if form.password1.errors %} {{
-                form.password1.errors}} {% endif %}
+                {{ form.password1 }} {% if form.password1.errors %}
+                {{form.password1.errors}} {% endif %}
                 <label for="signupPassword">{{ form.password1.label }}</label>
               </div>
               <div class="form-floating text-dark">
-                {{ form.password2 }} {% if form.password2.errors %} {{
-                form.password2.errors}} {% endif %}
+                {{form.password2}} {% if form.password2.errors %}
+                {{form.password2.errors}} {% endif %}
                 <label for="signupPasswordConfirm"
                   >{{ form.password2.label }}</label
                 >

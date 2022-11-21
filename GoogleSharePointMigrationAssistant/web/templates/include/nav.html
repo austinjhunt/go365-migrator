@@ -34,6 +34,22 @@
       <li class="nav-item">
         <span class="d-inline-block me-3 nav-link">{{user.username}}</span>
       </li>
+      {% if not google_oauth_authorized %}
+      <li class="nav-item">
+        <a
+          href="{% url 'init-google-auth' %}"
+          title="Authorize this app to access your Google account"
+          class="btn btn-outline-light me-2 nav-link text-light"
+          >Sign into Google</a
+        >
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <span class="d-inline-block me-3 nav-link"
+          >Google Access Authorized: {{google_oauth_user_email_address}}</span
+        >
+      </li>
+      {% endif %}
       <li class="nav-item">
         <a
           href="{% url 'list-migrations' %}"

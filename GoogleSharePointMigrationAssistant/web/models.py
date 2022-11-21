@@ -28,20 +28,13 @@ class AdministrationSettings(models.Model):
     class Meta:
         verbose_name = 'Administration Settings'
         verbose_name_plural = 'Administration Settings'
+
+    organization_name = models.CharField(max_length=128, blank=True, null=True)
+
     # For OAuth-driven migrations (user-driven)
-    google_oauth_client_id = models.CharField(max_length=100, null=True, blank=True, verbose_name='Google Service Account - Client ID')
-    google_oauth_project_id = models.CharField(max_length=50, verbose_name='Google Service Account - Project ID')
-    google_oauth_auth_uri = models.URLField(null=True, blank=True, verbose_name='Google Service Account - Auth URI')
-    google_oauth_token_uri = models.URLField(null=True, blank=True, verbose_name='Google Service Account - Token URI')
-    google_oauth_auth_provider_x509_cert_url = models.URLField(null=True, blank=True, verbose_name='Google Service Account - Auth Provider X509 Cert URL')
-    google_oauth_auth_client_secret = models.CharField(max_length=50, null=True, blank=True, verbose_name='Google Service Account - Client Secret')
-    
-    # For SVC-account driven migrations (admin-driven). More vulnerable, requires a highly privileged, centralized service account.
-    google_service_account_auth_project_id = models.CharField(max_length=128, null=True, blank=True, verbose_name='Google Service Account - Project ID')
-    google_service_account_auth_private_key_id = models.CharField(max_length=128, null=True, blank=True, verbose_name='Google Service Account - Private Key ID')
-    google_service_account_auth_private_key = models.TextField(null=True, blank=True, verbose_name='Google Service Account - Private Key')
-    google_service_account_auth_client_email = models.EmailField(null=True, blank=True, verbose_name='Google Service Account - Client Email')
-    google_service_account_auth_client_id = models.CharField(max_length=32, null=True, blank=True, verbose_name='Google Service Account - Client ID')
+    google_oauth_json_credentials = models.JSONField(null=True, blank=True, verbose_name='Google OAuth Credentials - JSON (Copy and Paste)')
+    google_service_account_auth_json_credentials = models.JSONField(null=True, blank=True, verbose_name='Google Service Account Credentials - JSON (Copy and Paste)')
+
 
     # SMTP-based email notifications.
     smtp_enable_email_notifications = models.BooleanField(default=False, verbose_name='Do you want to enable email notifications (on migration completion)? If so, the below fields will be required.')
@@ -56,31 +49,3 @@ class AdministrationSettings(models.Model):
     twilio_messaging_service_sid = models.CharField(max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Messaging Service SID')
     twilio_account_sid = models.CharField(max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Account SID (from your Twilio account dashboard)')
     twilio_account_auth_token = models.CharField(max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Account Auth Token (from your Twilio account dashboard)')
-
-
-class AdministrationSettings_ListAttributeItem(models.Model):
-    class Meta:
-        verbose_name = 'Administration Settings List Attribute Item'
-        verbose_name_plural = 'Administration Settings List Attribute Items'
-    """ Cannot really store a list of strings well in a single column so 
-    this handles storage of list attributes for administration settings. Store each 
-    as separate object linking back to admin settings via foreign key. """
-    class ListAttributeType(models.TextChoices):
-        
-        # OAuth-based (user-controlled)
-        GOOGLE_OAUTH_REDIRECT_URI = 'GOARU', _('Google OAuth Redirect URI')
-        GOOGLE_OAUTH_JS_ORIGIN = 'GOAJO', _('Google OAuth JS Origin')
-
-        # SVC-based (admin-controlled)
-        GOOGLE_SERVICE_ACCOUNT_AUTH_AUTH_URI = 'GSVCAURI', _('Google Service Account Auth URI')
-        GOOGLE_SERVICE_ACCOUNT_AUTH_TOKEN_URI = 'GSVCTURI', _('Google Service Account Token URI')
-        GOOGLE_SERVICE_ACCOUNT_AUTH_AUTH_PROVIDER_X509_CERT_URL = 'GSVCAPX509URI', _('Google Service Account Auth Provider X509 Cert URL')
-        GOOGLE_SERVICE_ACCOUNT_AUTH_CLIENT_X509_CERT_URL = 'GSVCCLIX509URI', _('Google Service Account Client X509 Cert URL')
-
-    administration_settings = models.ForeignKey(
-        AdministrationSettings, on_delete=models.CASCADE)
-    list_type = models.CharField(
-        max_length=32,
-        choices=ListAttributeType.choices,
-        default=ListAttributeType.GOOGLE_OAUTH_REDIRECT_URI
-    )

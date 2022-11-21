@@ -1,0 +1,60 @@
+{% extends 'include/master.html' %} {% block content %}
+<div class="container text-center">
+  <ol class="list-group">
+    <li
+      class="list-group-item d-flex justify-content-between align-items-start active"
+    >
+      <p>
+        Sign into Google and authorize this application to access your Google
+        data via Google OAuth.
+      </p>
+      {% if not google_oauth_authorized %}
+      <a
+        href="{% url 'init-google-auth' %}"
+        title="initialize google authorization"
+        class="btn btn-outline-light d-inline-block btn-success"
+        >Go</a
+      >
+      {% else %}
+      <a
+        href="{% url 'init-google-auth' %}"
+        title="authorization complete"
+        class="ms-auto btn btn-outline-light disabled"
+        >Authorized <i class="fa fa-check"></i
+      ></a>
+      {% endif %}
+    </li>
+    <li
+      class="list-group-item d-flex justify-content-between align-items-start disabled"
+    >
+      <p>
+        Log into Microsoft 365 and authorize this application to access your
+        OneDrive and SharePoint content via Azure OAuth.
+      </p>
+    </li>
+    <li
+      class="list-group-item d-flex justify-content-between align-items-start disabled"
+    >
+      <p>
+        Select a source file, folder, or shared drive from your Google Drive.
+        This selection is the data that will be migrated.
+      </p>
+    </li>
+    <li
+      class="list-group-item d-flex justify-content-between align-items-start disabled"
+    >
+      <p>
+        Select a destination in your OneDrive account or in SharePoint (e.g., a
+        Document Library on a SharePoint site). This is the destination to which
+        your selected Google source will be migrated.
+      </p>
+    </li>
+    <li
+      class="list-group-item d-flex justify-content-between align-items-start disabled"
+    >
+      <p>Enqueue migration and monitor its progress.</p>
+    </li>
+  </ol>
+</div>
+
+{% endblock %}

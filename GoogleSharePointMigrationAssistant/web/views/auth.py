@@ -95,3 +95,10 @@ class LogoutView(View):
             if kwargs.get('next', None):
                 redirectpath = kwargs.get('next')
         return redirect(redirectpath)
+
+
+class MicrosoftSingleSignOnView(View): 
+    def get(self, request): 
+        pass 
+
+    
