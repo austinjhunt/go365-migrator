@@ -11,6 +11,7 @@ urlpatterns = [
 
     # SSO - Microsoft Log In 
     path('m365-single-sign-on', MicrosoftSingleSignOnView.as_view(), name='m365-single-sign-on'),
+    path('m365-redirect-uri', MicrosoftSingleSignOnCallbackView.as_view(), name='m365-redirect-uri'),
 
     path('setup', SetupView.as_view(), name='setup'),
     path('list-migrations', ListMigrationsView.as_view(), name='list-migrations'),

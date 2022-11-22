@@ -3,8 +3,7 @@ config = AdministrationSettings.objects.first()
 def context(request): 
     return {
         'organization_name': config.organization_name,
-        'google_oauth_authorized': request.session.get('google_oauth_authorized', None),
-        'google_oauth_user_email_address': request.session.get('google_oauth_user_email_address', None),
-        'google_oauth_user_photo_link': request.session.get('google_oauth_user_photo_link', None),
-        'google_oauth_user_display_name': request.session.get('google_oauth_user_display_name', None)
+        'google_oauth_authorized': request.session.get('google_oauth_authorized', False),
+        'google_user': request.session.get('google_user', None),
+        'm365_user': request.session.get('m365_user', None)
     }

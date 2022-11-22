@@ -1,0 +1,20 @@
+{% extends 'include/master.html' %} {% block content %}
+<div
+  class="home container jumbotron w-75"
+  style="
+    background-color: transparent;
+    height: 70vh;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  "
+>
+  <div class="w-75 text-center">
+    {% if error %}
+    <h1>Error</h1>
+    <p><code>{{error}}</code></p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

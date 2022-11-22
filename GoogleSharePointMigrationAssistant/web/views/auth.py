@@ -89,6 +89,10 @@ class SignUpView(FormView):
 
 class LogoutView(View):
     def get(self, request, *args, **kwargs):
+        if 'm365_token_cache' in request.session:
+            del request.session['m365_token_cache']
+        if 'm365_user' in request.session:
+            del request.session['m365_user']
         redirectpath = '/'
         if request.user.is_authenticated:
             logout(request)
@@ -97,8 +101,5 @@ class LogoutView(View):
         return redirect(redirectpath)
 
 
-class MicrosoftSingleSignOnView(View): 
-    def get(self, request): 
-        pass 
 
     

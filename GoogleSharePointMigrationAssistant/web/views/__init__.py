@@ -1,5 +1,6 @@
 """ Views for web application"""
-from .auth import SignUpView, CustomLoginView, LogoutView, MicrosoftSingleSignOnView
+from .auth import SignUpView, CustomLoginView, LogoutView
+from .m365 import MicrosoftSingleSignOnView, MicrosoftSingleSignOnCallbackView
 from .base import HomeView
 from .migrations import ListMigrationsView
 from .setup import SetupView

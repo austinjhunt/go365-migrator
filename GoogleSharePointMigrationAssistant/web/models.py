@@ -49,3 +49,8 @@ class AdministrationSettings(models.Model):
     twilio_messaging_service_sid = models.CharField(max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Messaging Service SID')
     twilio_account_sid = models.CharField(max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Account SID (from your Twilio account dashboard)')
     twilio_account_auth_token = models.CharField(max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Account Auth Token (from your Twilio account dashboard)')
+
+    # Azure AD / Microsoft AuthN/AuthZ
+    azure_ad_client_id = models.CharField(max_length=128, null=True, blank=True, verbose_name='Azure AD App Registration - Application/Client ID')
+    azure_ad_client_secret = models.CharField(max_length=128,  null=True, blank=True, verbose_name='Azure AD App Registration - Client Secret')
+    azure_ad_tenant_id = models.CharField(max_length=128,  null=True, blank=True, verbose_name='Azure AD App Registration - (Directory) Tenant ID')

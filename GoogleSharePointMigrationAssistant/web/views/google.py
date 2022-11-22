@@ -1,27 +1,19 @@
 from django.views.generic import View
 from django.shortcuts import redirect, render
-from string import ascii_letters, digits
-from urllib.parse import quote
-import random 
 import requests
 import json
+import logging 
+from .util import get_random_value, serialize
 from ..models import AdministrationSettings
+logger = logging.getLogger(__name__)
 
 config = AdministrationSettings.objects.first()
 
 ### UTIL ### 
-print(config)
 scopes = [
   "openid profile",
   "https://www.googleapis.com/auth/drive.readonly",
 ]
-
-def get_random_value(length):
-    return ''.join(random.choices(ascii_letters + digits, k=length))
-
-def serialize(object):
-    """ convert specified object to string of concatenated query parameters """
-    return '&'.join([f'{quote(k)}={quote(v)}' for k,v in object.items()])
 
 def get_files(request):
     response = requests.get(
@@ -46,10 +38,17 @@ def refresh_access_token(request):
             'refresh_token': request.session.get('google_oauth_refresh_token'),
             'grant_type': 'refresh_token'
         })
-    ).json()
-    request.session['google_oauth_access_token'] = response['access_token']
-    request.session['google_oauth_scope'] = response['scope']
-    request.session['google_oauth_expires_in'] = response['expires_in']
+    )
+    data = response.json()
+    logger.debug({
+        'refresh_access_token_response': {
+            'status_code': response.status_code, 
+            'data': data
+        }
+    })
+    request.session['google_oauth_access_token'] = data['access_token']
+    request.session['google_oauth_scope'] = data['scope']
+    request.session['google_oauth_expires_in'] = data['expires_in']
     
 def exchange_auth_code_for_access_token(request):
     """ Use """
@@ -65,7 +64,12 @@ def exchange_auth_code_for_access_token(request):
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
             })
     data = response.json()
-    print(data)
+    logger.debug({
+        'exchange_auth_code_for_access_token_response': {
+            'status_code': response.status_code, 
+            'data': data
+        }
+    })
     request.session['google_oauth_id_token'] = data['id_token']
     request.session['google_oauth_access_token'] = data['access_token']
     request.session['google_oauth_refresh_token'] = data['refresh_token']
@@ -80,6 +84,12 @@ def get_google_user_data(request):
             'Accept': 'application/json'
         })
     data = response.json()
+    logger.debug({
+        'get_google_user_data_response': {
+            'status_code': response.status_code,
+            'data': data
+        }
+    })
     return data
 
 def start_oauth_flow(request): 
@@ -94,27 +104,53 @@ def start_oauth_flow(request):
         'nonce': get_random_value(length=24)
     }
     full_auth_url = f'{config.google_oauth_json_credentials["web"]["auth_uri"]}?{serialize(auth_params)}'
+    logger.debug({
+        'start_oauth_flow': {
+            'auth_params': auth_params, 
+            'full_auth_url': full_auth_url
+        }
+    })
     return redirect(full_auth_url)
 
 
 ### VIEWS ####
 class GoogleOAuthRedirectUri(View):
     def get(self, request): 
-        print(request.GET.get('state'))
         if request.GET.get('state', None) == request.session.get('google_oauth_state'):
             request.session['google_oauth_authorized'] = True 
             exchange_auth_code_for_access_token(request)
             user_data = get_google_user_data(request)
             if 'user' in user_data:
-                request.session['google_oauth_user_email_address'] = user_data['user']['emailAddress']
-                request.session['google_oauth_user_photo_link'] = user_data['user']['photoLink']
-                request.session['google_oauth_user_display_name'] = user_data['user']['displayName']
-            return render(
-                request=request, 
-                template_name='migrations/steps.html',
-                context={}
-            )
+                logger.debug({
+                    'google-oauth-redirect-uri-view': {
+                        'user_data': user_data
+                    }
+                })
+                request.session['google_user'] = {
+                    'email_address': user_data['user']['emailAddress'],
+                    'display_name': user_data['user']['displayName'],
+                    'photo_link': user_data['user']['photoLink']
+                }
+                return render(
+                    request=request, 
+                    template_name='migrations/steps.html',
+                    context={}
+                )
+            else: 
+                logger.error({
+                    'google-oauth-redirect-uri-view': {
+                        'error': 'user_data_missing',
+                        'action': 'redirect_to:start-flow'
+                    }
+                })
+                return redirect('start-flow')
         else:
+            logger.error({
+                    'google-oauth-redirect-uri-view': {
+                        'error': 'session_state_mismatch',
+                        'action': 'redirect_to:start-flow'
+                    }
+                })
             # Returned state does not match session state
             return redirect('start-flow')
 
