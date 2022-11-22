@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import logging
-import os 
+import os
 from dotenv import load_dotenv
 load_dotenv('../src/.env')
 logger = logging.getLogger(__name__)
@@ -150,9 +150,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = '/login'
-
-
-logger.debug(locals())
 
 AZURE_AD_APP_REGISTRATION_SCOPES = [
     "User.Read",
