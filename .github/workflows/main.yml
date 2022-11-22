@@ -1,9 +1,9 @@
 name: Django - Continuous Integration
-on: on:
+on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 jobs:
   testing_project:
     runs-on: ubuntu-latest # operating system your code will run on
@@ -26,7 +26,7 @@ jobs:
         run: |
           cd GoogleSharePointMigrationAssistant
           python manage.py makemigrations web 
-          python manage.py migrate web 
+          python manage.py migrate web
       - name: |
           cd GoogleSharePointMigrationAssistant
           python manage.py test
