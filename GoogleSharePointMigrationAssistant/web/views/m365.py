@@ -1,7 +1,4 @@
 from msal import ConfidentialClientApplication, SerializableTokenCache
-import requests
-import logging
-import json
 from django.core.cache import cache as django_cache
 from django.contrib.auth.models import User
 from django.contrib.auth import login
@@ -10,10 +7,11 @@ from django.shortcuts import render, redirect
 from django.views.generic import View
 from ..models import AdministrationSettings
 from django.conf import settings
+import requests
+import logging
+import json
 
 logger = logging.getLogger(__name__)
-
-GRAPH_URL = 'https://graph.microsoft.com/v1.0'
 
 
 def get_msal_app(cache=None):
@@ -34,7 +32,7 @@ class MicrosoftSingleSignOnView(View):
         """ generate a sign-in flow """
         auth_app = get_msal_app()
         return auth_app.initiate_auth_code_flow(
-            scopes=settings.AZURE_AD_APP_REGISTRATION_SCOPES,  # for just signing in
+            scopes=settings.AAD_CLIENT_SCOPES,  # for just signing in
             redirect_uri='http://localhost:8000/m365-redirect-uri',
         )
 
@@ -90,7 +88,7 @@ class MicrosoftSingleSignOnCallbackView(View):
         accounts = auth_app.get_accounts()
         if accounts:
             result = auth_app.acquire_token_silent(
-                settings.AZURE_AD_APP_REGISTRATION_SCOPES, account=accounts[0])
+                settings.AAD_CLIENT_SCOPES, account=accounts[0])
             self.save_cache(request, cache)
         return result
 
@@ -99,7 +97,7 @@ class MicrosoftSingleSignOnCallbackView(View):
         if not result:
             redirect('m365-single-sign-on')
         response = requests.get(
-            url=f'{GRAPH_URL}/me',
+            url=f'{settings.GRAPH_API_URL}/me',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
         )
         data = response.json()

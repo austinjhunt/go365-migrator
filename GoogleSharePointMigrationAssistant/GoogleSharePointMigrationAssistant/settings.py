@@ -151,8 +151,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = '/login'
 
-AZURE_AD_APP_REGISTRATION_SCOPES = [
+AAD_CLIENT_SCOPES = [
     "User.Read",
     "Files.ReadWrite.All",
     "Sites.Manage.All",
+]
+GRAPH_API_URL = 'https://graph.microsoft.com/v1.0'
+
+GCP_CLIENT_SCOPES = [
+    "openid profile",
+    "https://www.googleapis.com/auth/drive.readonly",
 ]
