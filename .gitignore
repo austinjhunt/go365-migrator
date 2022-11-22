@@ -8,3 +8,4 @@ src/svcaccount_key.json
 pagnotta.json
 staticfiles
 *.sqlite3
+*.rdb
