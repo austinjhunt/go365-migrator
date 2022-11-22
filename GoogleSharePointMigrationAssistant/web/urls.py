@@ -10,7 +10,7 @@ urlpatterns = [
     path('signup', SignUpView.as_view(), name='signup'),
 
     # SSO - Microsoft Log In 
-    path('m365-single-sign-on', MicrosoftSingleSignOnView.as_view(), name='m365-single-sign-on'),
+    path('init-m365-auth', MicrosoftSingleSignOnView.as_view(), name='init-m365-auth'),
     path('m365-redirect-uri', MicrosoftSingleSignOnCallbackView.as_view(), name='m365-redirect-uri'),
 
     path('setup', SetupView.as_view(), name='setup'),
@@ -18,5 +18,7 @@ urlpatterns = [
 
     # Google Oauth
     path('init-google-auth', InitializeGoogleOAuthView.as_view(), name='init-google-auth'), 
-    path('google-oauth-redirect-uri', GoogleOAuthRedirectUri.as_view(), name='google-oauth-redirect-uri') 
+    path('google-oauth-redirect-uri', GoogleOAuthRedirectUri.as_view(), name='google-oauth-redirect-uri'),
+
+    path('confirm-migration-sources/', ConfirmMigrationSourcesView.as_view(), name='confirm-migration-sources'),
 ]

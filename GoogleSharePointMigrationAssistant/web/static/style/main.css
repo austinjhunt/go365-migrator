@@ -15,7 +15,7 @@ html {
 
 body {
   font-family: "Raleway", sans-serif;
-  font-size: 100%;
+  font-size: 0.85rem;
   line-height: 1.64;
   font-weight: 400;
   color: #fff;
@@ -169,6 +169,11 @@ iframe {
 .lead {
   font-size: 1.3em;
   font-weight: 400;
+}
+
+/* tables */
+table.dataTable tbody th, table.dataTable tbody td {
+  padding: 2px 2px;
 }
 
 .colorbackground {

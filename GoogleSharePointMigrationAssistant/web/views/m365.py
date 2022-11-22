@@ -45,7 +45,7 @@ class MicrosoftSingleSignOnView(View):
             return redirect(flow['auth_uri'])
         except Exception as e:
             logger.error({
-                'm365-single-sign-on-view': {
+                'init-m365-auth-view': {
                     'error': str(e)
                 }
             })
@@ -95,7 +95,7 @@ class MicrosoftSingleSignOnCallbackView(View):
     def get_user_profile(self, request):
         result = self.get_token_from_cache(request)
         if not result:
-            redirect('m365-single-sign-on')
+            redirect('init-m365-auth')
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/me',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -149,11 +149,7 @@ class MicrosoftSingleSignOnCallbackView(View):
                 request=request,
                 user=local_user
             )
-            return render(
-                request=request,
-                template_name='next-steps.html',
-                context={}
-            )
+            return redirect('setup')
         else:
             return render(
                 request=request,

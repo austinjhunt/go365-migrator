@@ -1,0 +1,19 @@
+<div class="text-center h-100">
+  <p class="lead">
+    Log into Microsoft 365 and authorize this application to access your
+    OneDrive and SharePoint content via Azure OAuth.
+  </p>
+  {% if not m365_user %}
+  <a
+    href="{% url 'init-m365-auth' %}"
+    title="initialize microsoft 365 authorization"
+    class="btn btn-outline-light d-inline-block btn-success"
+    >Go</a>
+  {% else %}
+  <a
+    href="{% url 'init-m365-auth' %}"
+    title="authorization complete"
+    class="ms-auto btn btn-outline-light disabled"
+    >Authorized <i class="fa fa-check"></i></a>
+  {% endif %}
+</div>

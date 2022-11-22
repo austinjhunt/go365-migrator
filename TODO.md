@@ -13,3 +13,4 @@
 - Change admin settings to use list component for list items, e.g. js origins and redirect URIs
 - establish ordered steps flow for setting up migration
 - Use AAD application setting to determine user provisioning from SSO
+- Make "confirm source selections" auto-redirect to next step instead of having to click another "Continue" button

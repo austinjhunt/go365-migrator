@@ -1,128 +1,127 @@
 from django.views.generic import View
 from django.shortcuts import redirect, render
-import requests
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+import google_auth_oauthlib.flow
 from django.core.cache import cache as django_cache
 from django.conf import settings
-import json
 import logging
-from .util import get_random_value, serialize
 from ..models import AdministrationSettings
 logger = logging.getLogger(__name__)
 
 
+MIMETYPES = {
+    "application/pdf": "PDF",
+    "application/x-httpd-php": "PHP",
+    "application/vnd.google-apps.audio": "Audio",
+    "application/vnd.google-apps.document": "Google Docs",
+    "application/vnd.google-apps.drive-sdk": "3rd party shortcut",
+    "application/vnd.google-apps.drawing": "Google Drawing",
+    "application/vnd.google-apps.file": "Google Drive file",
+    "application/vnd.google-apps.folder": "Google Drive folder",
+    "application/vnd.google-apps.form": "Google Forms",
+    "application/vnd.google-apps.fusiontable": "Google Fusion Tables",
+    "application/vnd.google-apps.jam": "Google Jamboard",
+    "application/vnd.google-apps.map": "Google My Maps",
+    "application/vnd.google-apps.photo": "Google Photo",
+    "application/vnd.google-apps.presentation": "Google Slides",
+    "application/vnd.google-apps.script": "Google Apps Scripts",
+    "application/vnd.google-apps.shortcut": "Shortcut",
+    "application/vnd.google-apps.site": "Google Sites",
+    "application/vnd.google-apps.spreadsheet": "Google Sheets",
+    "application/vnd.google-apps.unknown": "Unknown",
+    "application/vnd.google-apps.video": "Video",
+    "application/msword": "Microsoft Word (.doc/.dot)",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Microsoft Word (.docx)",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.template": "Microsoft Word (.dotx)",
+    "application/vnd.ms-word.document.macroEnabled.12": "Microsoft Word (.docm)",
+    "application/vnd.ms-word.template.macroEnabled.12": "Microsoft Word (.dotm)",
+    "application/vnd.ms-excel": "Microsoft Excel (.xls, .xlt, .xla)",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Microsoft Excel (.xlsx)",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.template": "Microsoft Excel (.xltx)",
+    "application/vnd.ms-excel.sheet.macroEnabled.12": "Microsoft Excel (.xlsm)",
+    "application/vnd.ms-excel.template.macroEnabled.12": "Microsoft Excel (.xltm)",
+    "application/vnd.ms-excel.addin.macroEnabled.12": "Microsoft Excel (.xlam)",
+    "application/vnd.ms-excel.sheet.binary.macroEnabled.12": "Microsoft Excel (.xlsb)",
+    "application/vnd.ms-powerpoint": "Microsoft PowerPoint (.pps, .ppt, .ppa, .pot)",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation":  "Microsoft PowerPoint Presentation (.pptx)",
+    "application/vnd.openxmlformats-officedocument.presentationml.template": "Microsoft PowerPoint Template (.potx)",
+    "application/vnd.openxmlformats-officedocument.presentationml.slideshow": "Microsoft PowerPoint Presentation Slideshow(.ppsx)",
+    "application/vnd.ms-powerpoint.addin.macroEnabled.12": "Microsoft PowerPoint (.ppam)",
+    "application/vnd.ms-powerpoint.presentation.macroEnabled.12":  "Microsoft PowerPoint Presentation (.pptm)",
+    "application/vnd.ms-powerpoint.template.macroEnabled.12":  "Microsoft PowerPoint Template (.potm)",
+    "application/vnd.ms-powerpoint.slideshow.macroEnabled.12":  "Microsoft PowerPoint Slideshow (.ppam)"
+}
+
 ### UTIL ###
 
 
-def get_files(request):
-    response = requests.get(
-        'https://www.googleapis.com/drive/v3/files',
-        headers={
-            'Authorization': request.session.get('google_oauth_access_token'),
-            'Accept': 'application/json'
-        }
-    ).json()
-    return response['files']
+def get_google_credentials_from_session(request):
+    return Credentials(**request.session.get('google_credentials'))
 
 
-def refresh_access_token(request, config):
-    """ Refresh Google OAuth access token """
-    response = requests.post(
-        url=config.google_oauth_json_credentials['web']['token_uri'],
-        headers={
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
-        params=json.dumps({
-            'client_id': config.google_oauth_json_credentials['web']['client_id'],
-            'client_secret': config.google_oauth_json_credentials['web']['client_secret'],
-            'refresh_token': request.session.get('google_oauth_refresh_token'),
-            'grant_type': 'refresh_token'
-        })
-    )
-    data = response.json()
-    logger.debug({
-        'refresh_access_token_response': {
-            'status_code': response.status_code,
-            'data': data
-        }
-    })
-    request.session['google_oauth_access_token'] = data['access_token']
-    request.session['google_oauth_scope'] = data['scope']
-    request.session['google_oauth_expires_in'] = data['expires_in']
+def get_shared_drives(request, query=''):
+    with build('drive', 'v3', credentials=get_google_credentials_from_session(request)) as drive:
+        data = drive.drives().list(q=query).execute()
+        if 'drives' in data:
+            for f in data['drives']:
+                f['mimeTypeFriendly'] = 'Shared Drive'
+            return data['drives']
+        else:
+            logger.error({
+                'google_get_drives': {
+                    'error': data
+                }
+            })
+            return None
 
 
-def update_google_session_data(request, data: dict):
-    if 'google_oauth_id_token' not in request.session:
-        request.session['google_oauth_id_token'] = data['id_token']
-    if 'google_oauth_access_token' not in request.session:
-        request.session['google_oauth_access_token'] = data['access_token']
-    if 'google_oauth_refresh_token' not in request.session:
-        request.session['google_oauth_refresh_token'] = data['refresh_token']
-    if 'google_oauth_scope' not in request.session:
-        request.session['google_oauth_scope'] = data['scope']
-    if 'google_oauth_expires_in' not in request.session:
-        request.session['google_oauth_expires_in'] = data['expires_in']
-
-
-def exchange_auth_code_for_access_token(request, config):
-    """ Use """
-    params = {
-        'code': request.GET.get('code'),
-        'client_id': config.google_oauth_json_credentials['web']['client_id'],
-        'client_secret': config.google_oauth_json_credentials['web']['client_secret'],
-        'redirect_uri': config.google_oauth_json_credentials['web']['redirect_uris'][0],
-        'grant_type': 'authorization_code'
-    }
-    response = requests.post(
-        f"{config.google_oauth_json_credentials['web']['token_uri']}?{serialize(params)}", headers={
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        })
-    data = response.json()
-    logger.debug({
-        'exchange_auth_code_for_access_token_response': {
-            'status_code': response.status_code,
-            'data': data
-        }
-    })
-    update_google_session_data(request=request, data=data)
+def get_files(request, query=''):
+    with build('drive', 'v3',
+               credentials=get_google_credentials_from_session(request)) as drive:
+        data = drive.files().list(q=query).execute()
+        if 'files' in data:
+            for f in data['files']:
+                if f['mimeType'] in MIMETYPES:
+                    f['mimeTypeFriendly'] = MIMETYPES[f['mimeType']]
+                else:
+                    f['mimeTypeFriendly'] = f['mimeType'].replace(
+                        'application/', '')
+            return data['files']
+        else:
+            logger.error({
+                'google_get_files': {
+                    'error': data
+                }
+            })
+            return None
 
 
 def get_google_user_data(request):
-    response = requests.get(
-        'https://www.googleapis.com/drive/v3/about?fields=user',
-        headers={
-            'Authorization': f'Bearer {request.session.get("google_oauth_access_token")}',
-            'Accept': 'application/json'
-        })
-    data = response.json()
-    logger.debug({
-        'get_google_user_data_response': {
-            'status_code': response.status_code,
-            'data': data
-        }
-    })
-    return data
+    with build('drive', 'v3',  credentials=get_google_credentials_from_session(request)) as drive:
+        data = drive.about().get(fields='user').execute()
+        logger.debug({'get_google_user_data_response': data})
+        if 'user' in data:
+            return data
+        else:
+            logger.error({
+                'get_google_user_data_response': data, 
+                'error': 'user_data_missing'
+            })
+            return None
 
 
 def start_oauth_flow(request, config):
-
-    request.session['google_oauth_state'] = get_random_value(length=24)
-    auth_params = {
-        'response_type': 'code',  # should always be code for basic auth code flow
-        'client_id': config.google_oauth_json_credentials['web']['client_id'],
-        'access_type': 'offline',  # allwo refresh token
-        'scope': ' '.join(settings.GCP_CLIENT_SCOPES),
-        'redirect_uri': config.google_oauth_json_credentials['web']['redirect_uris'][0],
-        'state': request.session.get('google_oauth_state'),
-        'nonce': get_random_value(length=24)
-    }
-    full_auth_url = f'{config.google_oauth_json_credentials["web"]["auth_uri"]}?{serialize(auth_params)}'
-    logger.debug({
-        'start_oauth_flow': {
-            'auth_params': auth_params,
-            'full_auth_url': full_auth_url
-        }
-    })
-    return redirect(full_auth_url)
+    """ Start OAuth 2.0 Authorization Code Flow """
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        client_config=config.google_oauth_json_credentials,
+        scopes=settings.GCP_CLIENT_SCOPES)
+    flow.redirect_uri = config.google_oauth_json_credentials['web']['redirect_uris'][0]
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true')
+    request.session['google_oauth_state'] = state
+    return redirect(authorization_url)
 
 
 ### VIEWS ####
@@ -131,8 +130,24 @@ class GoogleOAuthRedirectUri(View):
         config = django_cache.get(
             'config', AdministrationSettings.objects.first())
         if request.GET.get('state', None) == request.session.get('google_oauth_state'):
+            flow = google_auth_oauthlib.flow.Flow.from_client_config(
+                client_config=config.google_oauth_json_credentials,
+                scopes=settings.GCP_CLIENT_SCOPES)
+            flow.redirect_uri = config.google_oauth_json_credentials['web']['redirect_uris'][0]
+       
+            flow.fetch_token(
+                code=request.GET.get('code'),
+            )
+            credentials = flow.credentials
+            request.session['google_credentials'] = {
+                'token': credentials.token,
+                'refresh_token': credentials.refresh_token,
+                'token_uri': credentials.token_uri,
+                'client_id': credentials.client_id,
+                'client_secret': credentials.client_secret,
+                'scopes': credentials.scopes}
+
             request.session['google_oauth_authorized'] = True
-            exchange_auth_code_for_access_token(request, config=config)
             user_data = get_google_user_data(request)
             if 'user' in user_data:
                 logger.debug({
@@ -145,28 +160,24 @@ class GoogleOAuthRedirectUri(View):
                     'display_name': user_data['user']['displayName'],
                     'photo_link': user_data['user']['photoLink']
                 }
-                return render(
-                    request=request,
-                    template_name='next-step.html',
-                    context={}
-                )
+                return redirect('setup')
             else:
                 logger.error({
                     'google-oauth-redirect-uri-view': {
                         'error': 'user_data_missing',
-                        'action': 'redirect_to:start-flow'
+                        'action': 'redirect_to:init-google-auth'
                     }
                 })
-                return redirect('start-flow')
+                return redirect('init-google-auth')
         else:
             logger.error({
                 'google-oauth-redirect-uri-view': {
                     'error': 'session_state_mismatch',
-                    'action': 'redirect_to:start-flow'
+                    'action': 'redirect_to:init-google-auth'
                 }
             })
             # Returned state does not match session state
-            return redirect('start-flow')
+            return redirect('init-google-auth')
 
 
 class InitializeGoogleOAuthView(View):
@@ -174,4 +185,5 @@ class InitializeGoogleOAuthView(View):
         config = django_cache.get(
             'config', AdministrationSettings.objects.first())
         django_cache.set('config', config)
+
         return start_oauth_flow(request=request, config=config)

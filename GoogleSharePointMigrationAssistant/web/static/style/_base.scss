@@ -182,3 +182,10 @@ iframe {
   font-size: 1.3em;
   font-weight: 400;
 }
+
+
+/* tables */ 
+
+table.dataTable tbody th, table.dataTable tbody td {
+  padding: 2px 2px;
+}

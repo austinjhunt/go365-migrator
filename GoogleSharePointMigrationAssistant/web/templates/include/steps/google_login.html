@@ -1,0 +1,20 @@
+<div class="text-center h-100">
+  <p class="lead">
+    Sign into Google and authorize this application to access your Google data.
+  </p>
+  {% if not google_user %}
+  <a
+    href="{% url 'init-google-auth' %}"
+    title="initialize google authorization"
+    class="btn btn-outline-light d-inline-block btn-success"
+    >Go</a
+  >
+  {% else %}
+  <a
+    href="{% url 'init-google-auth' %}"
+    title="authorization complete"
+    class="ms-auto btn btn-outline-light"
+    >Authorized <i class="fa fa-check"></i
+  ></a>
+  {% endif %}
+</div>

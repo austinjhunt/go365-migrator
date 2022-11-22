@@ -1,0 +1,19 @@
+[
+     
+    { 
+        "google_source_name": "austin353 Migration Folder",
+        "google_source_type": "folder",
+        "local_temp_dir": "austin353 Migration Folder",
+        "target_type": "onedrive", 
+        "target_onedrive_username": "huntaj@cofc.edu", 
+        "notify_stakeholders": [
+            {"name": "Austin", "email" : "huntaj@cofc.edu"}
+        ],
+        "cc_emails": [
+            "austin353@gmail.com"
+        ],
+        "file_batch_size": 3,
+        "verbose": true, 
+        "wait_for_confirmation_before_migrating": false
+    }
+]

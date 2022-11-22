@@ -32,6 +32,14 @@
         >
       </li>
       {% else %}
+      <li class="nav-item">
+        <a
+          href="{% url 'list-migrations' %}"
+          title="view all of your migrations"
+          class="btn btn-outline-light me-2 nav-link text-light"
+          >Migrations</a
+        >
+      </li>
       <li class="nav-item dropdown">
         <a
           class="nav-link dropdown-toggle btn btn-outline-light me-2 nav-link text-light"
@@ -65,7 +73,7 @@
           {% if not m365_user %}
           <a
             class="dropdown-item"
-            href="{% url 'init-google-auth' %}"
+            href="{% url 'init-m365-auth' %}"
             title="Authorize this app to access your Microsoft account"
             ><i class="fa fa-brands fa-microsoft"></i> Sign into Microsoft 365
           </a>
@@ -83,14 +91,6 @@
             ><i class="fa fa-right-from-bracket"></i> Log Out</a
           >
         </div>
-      </li>
-      <li class="nav-item">
-        <a
-          href="{% url 'list-migrations' %}"
-          title="view all of your migrations"
-          class="btn btn-outline-light me-2 nav-link text-light"
-          >Migrations</a
-        >
       </li>
       {% endif %}
     </ul>

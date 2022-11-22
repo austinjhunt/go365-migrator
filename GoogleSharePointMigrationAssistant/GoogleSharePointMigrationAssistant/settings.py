@@ -159,6 +159,8 @@ AAD_CLIENT_SCOPES = [
 GRAPH_API_URL = 'https://graph.microsoft.com/v1.0'
 
 GCP_CLIENT_SCOPES = [
-    "openid profile",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "openid",
     "https://www.googleapis.com/auth/drive.readonly",
+    
 ]

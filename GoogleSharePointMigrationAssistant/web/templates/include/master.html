@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -20,6 +19,7 @@
       sizes="32x32"
       href="{% static 'favicon-32x32.png' %}"
     />
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
     <link
       rel="icon"
       type="image/png"
@@ -59,87 +59,10 @@
   </head>
 
   <body class="colorbackground">
-    <div
-      aria-live="polite"
-      aria-atomic="true"
-      class="toasty-wrapper bg-dark position-fixed bottom-0 end-0 start-0 bd-example-toasts"
-    >
-      <div
-        class="toast-container position-absolute bottom-0 end-0 p-3"
-        id="toastPlacement"
-      >
-        <!-- Later, add data-bs-autohide="false" and then give a system for adding tags to papers in your library -->
-        <div
-          class="toast paper-saved-toast"
-          role="alert"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <div class="toast-header">
-            <strong class="me-auto"
-              ><i class="fa fa-md fa-bell text-primary"></i>&nbsp; Paper
-              Saved!</strong
-            >
-            <small id="paper-saved-toast-when"></small>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
-          </div>
-
-          <div id="paper-saved-toast-body" class="toast-body text-dark"></div>
-          <div class="toast-body text-dark">
-            <!-- <div class="input-group input-group-sm mb-2"> 
-           <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" placeholder="Add a tag">
-         </div>    -->
-            <a
-              class="btn btn-primary btn-sm"
-              href="/library/"
-              title="Go to library"
-              ><strong>Go to Library</strong></a
-            >
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div
-      aria-live="polite"
-      aria-atomic="true"
-      class="generic-toasty-wrapper bg-dark position-fixed bottom-0 end-0 start-0 bd-example-toasts"
-    >
-      <div
-        class="toast-container position-absolute bottom-0 end-0 p-3"
-        id="toastPlacement"
-      >
-        <!-- Later, add data-bs-autohide="false" and then give a system for adding tags to papers in your library -->
-        <div
-          class="toast generic-toast"
-          role="alert"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <div class="toast-header">
-            <strong class="me-auto"
-              ><i class="fa fa-md fa-bell text-primary"></i>&nbsp;
-              Success!</strong
-            >
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
-          </div>
-
-          <div id="generic-toast-body" class="toast-body text-dark"></div>
-          <div class="toast-body text-dark"></div>
-        </div>
-      </div>
-    </div>
-
+    <form class="d-none">
+      {% csrf_token %}
+    </form>
+    {% include 'include/toast.html' %}
     <div class="loader_container_wrapper">
       <div class="loader"></div>
     </div>
@@ -149,8 +72,8 @@
     </header>
     <div class="page-content">{% block content %} {% endblock %}</div>
 
-    <footer>
-      <div class="container">
+    <footer class="mt-5">
+      <div class="container ">
         <div class="footer-col">
           Copyright &copy; 2022 GSP Migration Assistant
         </div>
@@ -161,7 +84,6 @@
         </div>
       </div>
     </footer>
-
     <!-- The following are scripts that are needed for using bootstrap! -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script
@@ -169,6 +91,7 @@
       integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
       crossorigin="anonymous"
     ></script>
-    <script type="module" src="{% static 'js/main.js' %}"></script>
+    <script src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
   </body>
 </html>

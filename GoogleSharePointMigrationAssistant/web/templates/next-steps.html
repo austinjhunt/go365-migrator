@@ -1,0 +1,16 @@
+{% extends 'include/master.html' %} {% block content %}
+<div class="container pt-4">
+    {% if step == 'google_login' %} 
+      {% include 'include/steps/google_login.html' %} 
+    {% elif step == 'm365_login' %}
+      {% include 'include/steps/m365_login.html' %} 
+    {% elif step == 'select_source' %} 
+      {% include 'include/steps/select_source.html' %} 
+    {% elif step == 'select_destination' %} 
+      {% include 'include/steps/select_destination.html' %} 
+    {% elif step == 'start_migration' %} 
+      {% include 'include/steps/start_migration.html' %} 
+    {% endif %}
+</div>
+
+{% endblock %}
