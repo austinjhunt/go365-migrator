@@ -151,24 +151,12 @@ class MicrosoftSingleSignOnCallbackView(View):
             )
             return render(
                 request=request,
-                template_name='migrations/steps.html',
+                template_name='next-steps.html',
                 context={}
             )
         else:
             return render(
                 request=request,
                 template_name='error.html',
-                context={'error': json.dumps(user)}
+                context={'error': graph_user_data['error']}
             )
-
-        x = {'graph_user_data': {
-            '@odata.context': 'https://graph.microsoft.com/v1.0/$metadata#users/$entity',
-            'businessPhones': ['+1 1111111111'],
-            'displayName': 'Hunt, Austin',
-            'givenName': 'Austin',
-            'jobTitle': 'Digital Comms Developer',
-            'mobilePhone': None,
-            'officeLocation': 'Remote',
-            'preferredLanguage': None,
-            'surname': 'Hunt', 'userPrincipalName':
-            'huntaj@cofc.edu', 'id': '908b9339-6510-4f8b-b89e-260ce8b27267'}}

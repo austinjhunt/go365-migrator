@@ -19,51 +19,77 @@
           href="{% url 'login' %}"
           title="log in if you already have an account"
           class="btn btn-outline-light me-2 nav-link text-light"
-          >Log In</a
+          ><i class="fa fa-right-to-bracket"></i> Log In</a
         >
       </li>
       <li class="nav-item">
         <a
           href="{% url 'signup' %}"
-          title="sign up. create an account"
+          title="Create an account"
           class="btn btn-outline-light me-2 nav-link text-light"
-          >Sign Up</a
+        >
+          <i class="fa fa-user-plus"></i> Create Account</a
         >
       </li>
       {% else %}
-      <li class="nav-item">
-        <span class="d-inline-block me-3 nav-link">{{user.username}}</span>
-      </li>
-      {% if not google_oauth_authorized %}
-      <li class="nav-item">
+      <li class="nav-item dropdown">
         <a
-          href="{% url 'init-google-auth' %}"
-          title="Authorize this app to access your Google account"
-          class="btn btn-outline-light me-2 nav-link text-light"
-          >Sign into Google</a
+          class="nav-link dropdown-toggle btn btn-outline-light me-2 nav-link text-light"
+          href="#"
+          id="nav-accounts-dropdown"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
         >
-      </li>
-      {% else %}
-      <li class="nav-item">
-        <span class="d-inline-block me-3 nav-link"
-          >Google Access Authorized: {{google_oauth_user_email_address}}</span
+          {{user.username}}
+        </a>
+        <div
+          class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="nav-accounts-dropdown"
         >
+          {% if not google_user %}
+          <a
+            class="dropdown-item"
+            href="{% url 'init-google-auth' %}"
+            title="Authorize this app to access your Google account"
+            ><i class="fa fa-brands fa-google"></i> Sign into Google
+          </a>
+          {% else %}
+          <span class="dropdown-item">
+            <i class="fa fa-brands fa-google"></i>
+            {{google_user.email_address}}
+          </span>
+          {% endif %}
+          <div class="dropdown-divider"></div>
+          {% if not m365_user %}
+          <a
+            class="dropdown-item"
+            href="{% url 'init-google-auth' %}"
+            title="Authorize this app to access your Microsoft account"
+            ><i class="fa fa-brands fa-microsoft"></i> Sign into Microsoft 365
+          </a>
+          {% else %}
+          <span class="dropdown-item">
+            <i class="fa fa-brands fa-microsoft"></i>
+            {{m365_user.email_address}}
+          </span>
+          {% endif %}
+          <div class="dropdown-divider"></div>
+          <a
+            href="{% url 'logout' %}"
+            title="log out of this application"
+            class="dropdown-item"
+            ><i class="fa fa-right-from-bracket"></i> Log Out</a
+          >
+        </div>
       </li>
-      {% endif %}
       <li class="nav-item">
         <a
           href="{% url 'list-migrations' %}"
           title="view all of your migrations"
           class="btn btn-outline-light me-2 nav-link text-light"
           >Migrations</a
-        >
-      </li>
-      <li class="nav-item">
-        <a
-          href="{% url 'logout' %}"
-          title="log out"
-          class="btn btn-outline-light me-2 nav-link text-light"
-          >Log Out</a
         >
       </li>
       {% endif %}

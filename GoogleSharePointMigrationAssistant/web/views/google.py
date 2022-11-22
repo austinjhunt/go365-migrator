@@ -50,6 +50,19 @@ def refresh_access_token(request, config):
     request.session['google_oauth_expires_in'] = data['expires_in']
 
 
+def update_google_session_data(request, data: dict):
+    if 'google_oauth_id_token' not in request.session:
+        request.session['google_oauth_id_token'] = data['id_token']
+    if 'google_oauth_access_token' not in request.session:
+        request.session['google_oauth_access_token'] = data['access_token']
+    if 'google_oauth_refresh_token' not in request.session:
+        request.session['google_oauth_refresh_token'] = data['refresh_token']
+    if 'google_oauth_scope' not in request.session:
+        request.session['google_oauth_scope'] = data['scope']
+    if 'google_oauth_expires_in' not in request.session:
+        request.session['google_oauth_expires_in'] = data['expires_in']
+
+
 def exchange_auth_code_for_access_token(request, config):
     """ Use """
     params = {
@@ -70,11 +83,7 @@ def exchange_auth_code_for_access_token(request, config):
             'data': data
         }
     })
-    request.session['google_oauth_id_token'] = data['id_token']
-    request.session['google_oauth_access_token'] = data['access_token']
-    request.session['google_oauth_refresh_token'] = data['refresh_token']
-    request.session['google_oauth_scope'] = data['scope']
-    request.session['google_oauth_expires_in'] = data['expires_in']
+    update_google_session_data(request=request, data=data)
 
 
 def get_google_user_data(request):
@@ -138,7 +147,7 @@ class GoogleOAuthRedirectUri(View):
                 }
                 return render(
                     request=request,
-                    template_name='migrations/steps.html',
+                    template_name='next-step.html',
                     context={}
                 )
             else:
@@ -165,4 +174,4 @@ class InitializeGoogleOAuthView(View):
         config = django_cache.get(
             'config', AdministrationSettings.objects.first())
         django_cache.set('config', config)
-        return start_oauth_flow(request)
+        return start_oauth_flow(request=request, config=config)
