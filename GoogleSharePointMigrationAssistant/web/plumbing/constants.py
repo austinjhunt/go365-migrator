@@ -4,11 +4,15 @@ import json
 from dotenv import load_dotenv
 load_dotenv()
 
-LOG_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'migration-logs')
-DEFAULT_PAGESIZE = 1000 
-PARENT_PATH = Path(os.path.realpath(__file__)).parent.absolute()
-TOKEN_JSON = os.path.join(PARENT_PATH, 'token.json')
-CREDENTIALS_JSON = os.path.join(PARENT_PATH, 'credentials.json')
+try:
+    LOG_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'migration-logs')
+    DEFAULT_PAGESIZE = 1000 
+    PARENT_PATH = Path(os.path.realpath(__file__)).parent.absolute()
+    TOKEN_JSON = os.path.join(PARENT_PATH, 'token.json')
+    CREDENTIALS_JSON = os.path.join(PARENT_PATH, 'credentials.json')
+except:
+    # GitHub Actions testing fails here as expected.
+    pass 
 
 MAX_LIST_THREADS = 10 
 MAX_UPLOAD_THREADS = 30 
@@ -28,26 +32,20 @@ ONE_MINUTE = 60
 GRAPH_SLEEP_RETRY_SECONDS = 25
 
 # Onedrive file management 
-ONEDRIVE_APP_CLIENT_ID = os.environ.get('ONEDRIVE_APP_CLIENT_ID')
-ONEDRIVE_APP_CLIENT_SECRET = os.environ.get('ONEDRIVE_APP_CLIENT_SECRET')
-ONEDRIVE_APP_TENANT_ID = os.environ.get('ONEDRIVE_APP_TENANT_ID')
+ONEDRIVE_APP_CLIENT_ID = os.environ.get('ONEDRIVE_APP_CLIENT_ID', None)
+ONEDRIVE_APP_CLIENT_SECRET = os.environ.get('ONEDRIVE_APP_CLIENT_SECRET', None)
+ONEDRIVE_APP_TENANT_ID = os.environ.get('ONEDRIVE_APP_TENANT_ID', None)
 
 # Non-OneDrive SharePoint App-Only Auth File Management
-SHAREPOINT_APP_CLIENT_ID = os.environ.get('SHAREPOINT_APP_CLIENT_ID')
-SHAREPOINT_APP_CLIENT_SECRET = os.environ.get('SHAREPOINT_APP_CLIENT_SECRET')
+SHAREPOINT_APP_CLIENT_ID = os.environ.get('SHAREPOINT_APP_CLIENT_ID', None)
+SHAREPOINT_APP_CLIENT_SECRET = os.environ.get('SHAREPOINT_APP_CLIENT_SECRET', None)
 
 # SMTP 
-SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
-SMTP_PORT = int(os.environ.get('SMTP_PORT'))
-SMTP_SERVER = os.environ.get('SMTP_SERVER')  
+SMTP_USERNAME = os.environ.get('SMTP_USERNAME', None)
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', None)
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+SMTP_SERVER = os.environ.get('SMTP_SERVER', None)  
 
 # Google Auth
-try:
-    GOOGLE_DRIVE_SVCACCOUNT_AUTH = json.loads(os.environ.get('GOOGLE_DRIVE_SVCACCOUNT_AUTH'))
-except:
-    pass 
-try:
-    GOOGLE_DRIVE_OAUTH_CREDS = json.loads(os.environ.get('GOOGLE_DRIVE_OAUTH_CREDS'))
-except:
-    pass 
+GOOGLE_DRIVE_SVCACCOUNT_AUTH = json.loads(os.environ.get('GOOGLE_DRIVE_SVCACCOUNT_AUTH',"{}"))
+GOOGLE_DRIVE_OAUTH_CREDS = json.loads(os.environ.get('GOOGLE_DRIVE_OAUTH_CREDS', "{}"))
