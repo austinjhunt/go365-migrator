@@ -110,6 +110,29 @@ def get_user_profile(request):
         logger.debug(msg)
     return data
 
+def get_user_onedrive_item_by_id(request, item_id):
+    if f'user_onedrive_folder_{item_id}' not in request.session:
+        result = get_token_from_cache(request)
+        response = requests.get(
+            url=f'{settings.GRAPH_API_URL}/me/drive/items/{item_id}',
+            headers={'Authorization': f'Bearer {result["access_token"]}'},
+        )
+        data = response.json()
+        msg = {
+            'get_user_onedrive_root_children_response': {
+                'status_code': response.status_code,
+                'data': data
+            }
+        }
+        if response.status_code != 200:
+            logger.error(msg)
+            return None
+        else:
+            logger.debug(msg)
+        request.session[f'user_onedrive_folder_{item_id}'] = data
+    else:
+        data = request.session.get(f'user_onedrive_folder_{item_id}')
+    return data 
 
 def get_user_onedrive_root_children(request):
     if 'user_onedrive_root_children' not in request.session:

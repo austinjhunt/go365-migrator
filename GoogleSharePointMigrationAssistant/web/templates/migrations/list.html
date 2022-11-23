@@ -2,13 +2,53 @@
 <div class="container">
   <div class="row">
     {% if migrations %} 
-    <p class="lead">Your Data Migrations</p>
-    {% for mig in migrations %}
-    <div class="col-sm-12 d-flex justify-content-between">
-      <p>{{mig.friendly_description}}</p>
-    </div>
-
-    {% endfor %} {% else %}
+    <table class="datatable table">
+      <thead>
+        <tr><p>Your Data Migrations</p></th>
+        <tr>
+          <th colspan="2" class="text-center border-right"><i class="fa fa-brands fa-google"></i> Source
+          </th>
+          <th  colspan="4" class="text-center border-left"><i class="fa fa-brands fa-microsoft"></i> Destination
+          </th>
+          <th></th>
+        </tr>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Folder</th>
+        <th>Site</th>
+        <th>Document Library</th>
+        <th>Migration Status</th>
+      </tr>
+      </thead>
+      <tbody>
+        {% for mig in migrations %}
+          <tr>
+            <td>{{mig.source_type}}</td>
+            <td>{{mig.source_name}}</td>
+            <td>{{mig.target_type}}</td>
+            <td>{{mig.target_folder_name}}</td>
+            {% if mig.target_type == 'sharepoint_folder' %}
+              <td>
+                <a 
+                href"{{mig.target_site_url}}" 
+                target="_blank" 
+                title="open the sharepoint site {{mig.target_site_display_name}} in a new tab">
+                {{mig.target_site_display_name}}
+                </a>
+              </td>
+              <td>{{mig.target_document_library_name}}</td>
+            {% else %}
+              <td>N/A</td>
+              <td>N/A</td>
+            {% endif %}
+            <td>{{mig.job_status}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+     {% else %}
     <div class="col-sm-12 text-center">
       <p class="lead">
         You currently do not have any active or queued data migrations.
@@ -21,7 +61,6 @@
         <i class="fa fa-plus"></i> Create Migration</a
       >
     </div>
-
     {% endif %}
   </div>
 </div>

@@ -27,8 +27,14 @@ urlpatterns = [
 
     # migration destination selection 
     path('change-destination', ChangeDestinationView.as_view(), name='change-destination'),
-    path('use-onedrive-destination', UseOneDriveDestinationView.as_view(), name='use-onedrive-destination'),
+    
+    ## ONEDRIVE SELECTED ##
+    # folder selection after onedrive chosen as destination
+    path('use-onedrive-destination/<str:folder_id>', UseOneDriveDestinationViewSet.as_view({'get': 'get_folder'}), name='use-onedrive-folder-destination'),
+    path('use-onedrive-destination', UseOneDriveDestinationViewSet.as_view({'get': 'get_base'}), name='use-onedrive-destination'),
+    ## END ONEDRIVE SELECTED ##
 
+    ## SHAREPOINT SELECTED ##
     # folder selection after doc lib selected for sharepoint destination
     path('use-sharepoint-destination/<str:site_id>/<str:doclib_id>/<str:folder_id>', UseSharePointDestinationViewSet.as_view({'get': 'get_folder'}), name='use-sharepoint-destination'),
     # document library selection after sharepoint site selection for sharepoint destination
@@ -37,7 +43,7 @@ urlpatterns = [
     path('use-sharepoint-destination/<str:site_id>', UseSharePointDestinationViewSet.as_view({'get': 'get_site'}), name='use-sharepoint-destination'),
     # once sharepoint destination is selected
     path('use-sharepoint-destination', UseSharePointDestinationView.as_view(), name='use-sharepoint-destination'),
-
+    ## END SHAREPOINT SELECTED
   
 
     

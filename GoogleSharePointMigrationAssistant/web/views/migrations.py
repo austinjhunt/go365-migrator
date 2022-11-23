@@ -4,14 +4,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
 from django.shortcuts import render, redirect
 import logging
-import json
 from ..models import Migration
 from ..forms import SharePointSiteSearchForm
 from .util import (
     get_user_onedrive_root_children, get_user_sharepoint_sites,
     get_sharepoint_site_document_libraries, get_sharepoint_site_by_id,
     get_sharepoint_doclib_by_id, get_sharepoint_doclib_children_by_id,
-    get_sharepoint_doclib_item_by_id
+    get_sharepoint_doclib_item_by_id, get_user_onedrive_item_by_id
 )
 from ..plumbing.migrationassistant import MigrationAssistant
 
@@ -187,8 +186,8 @@ class UseSharePointDestinationViewSet(viewsets.ViewSet):
 
 #### ONEDRIVE DESTINATION ####
 
-class UseOneDriveDestinationView(View, LoginRequiredMixin):
-    def get(self, request):
+class UseOneDriveDestinationViewSet(viewsets.ViewSet, LoginRequiredMixin):
+    def get_base(self, request):
         return render(
             request=request,
             template_name='destinations/select-onedrive-folder.html',
@@ -196,13 +195,13 @@ class UseOneDriveDestinationView(View, LoginRequiredMixin):
                 'folders': [el for el in get_user_onedrive_root_children(request) if 'folder' in el]
             }
         )
-
-
-class UseOneDriveFolderDestinationView(View, LoginRequiredMixin):
-    def get(self, request, folder_id):
+    def get_folder(self, request, folder_id):
         request.session['destination_selected'] = {
-            'onedrive_folder': folder_id
+            'onedrive_folder': {
+                'folder': get_user_onedrive_item_by_id(request, folder_id)
+            }
         } 
         return redirect('setup')
+
 
 #### END ONEDRIVE DESTINATION ####

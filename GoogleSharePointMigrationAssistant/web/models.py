@@ -72,31 +72,33 @@ class Migration(models.Model):
     def friendly_description(self):
         """ Output friendly description of migration for front end display"""
         if self.target['type'] == 'onedrive_folder':
-            dest_string = f'the folder {self.target["details"]["name"]} in your OneDrive'
+            dest_string = f'the folder {self.target_folder_name} in your OneDrive'
         elif self.target['type'] == 'sharepoint_folder':
             dest_string = (
-                f'the folder {self.target["details"]["folder"]["name"]} '
-                f'in the Document Library {self.target_document_library_name} '
-                f'on the SharePoint Site {self.target["details"]["site"]["displayName"]}'
+                f'the folder {self.target_folder_name} in the Document '
+                f'Library {self.target_document_library_name} on the '
+                f'SharePoint Site {self.target_site_display_name}'
             )
         return (
-            f'Migrate {self.google_source_type} {self.google_source_name} '
+            f'Migrate {self.source_type} {self.source_name} '
             f'to {dest_string}. Migration job is currently {self.state.lower()}'
         )
-
     
-
     @property 
-    def google_source_type(self):
+    def source_type(self):
         return self.google_source["type"]
 
     @property 
-    def google_source_name(self):
+    def source_name(self):
         return self.google_source["details"]["name"]
     
     @property 
     def google_source_id(self):
         return self.google_source["details"]["id"]
+
+    @property 
+    def target_type(self):
+        return self.target["type"]
 
     @property
     def target_folder(self):
@@ -131,8 +133,20 @@ class Migration(models.Model):
         return self.target["details"]["site"]["name"]
 
     @property 
+    def target_site_display_name(self):
+        return self.target["details"]["site"]["displayName"]
+
+    @property 
+    def target_site_url(self):
+        return self.target["details"]["site"]["webUrl"]
+
+    @property 
     def target_site_id(self):
         return self.target["details"]["site"]["id"]
+
+    @property 
+    def job_status(self):
+        return self.state.capitalize()
 
 
     def start_job(self):
