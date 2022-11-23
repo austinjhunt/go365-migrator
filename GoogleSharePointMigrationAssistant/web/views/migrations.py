@@ -13,7 +13,7 @@ from .util import (
     get_sharepoint_doclib_by_id, get_sharepoint_doclib_children_by_id,
     get_sharepoint_doclib_item_by_id
 )
-#from ..plumbing.migrationassistant import MigrationAssistant
+from ..plumbing.migrationassistant import MigrationAssistant
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,43 @@ class ListMigrationsView(View, LoginRequiredMixin):
 
 class StartMigrationView(View, LoginRequiredMixin):
     def get(self, request):
+        
+        # clear_logs()
+        # verbose = False if not 'verbose' in migration else migration['verbose']
+        # assistant = Google2SharePointAssistant(
+        #     migration=migration, 
+        #     verbose=verbose,
+        #     google_auth_method='svc_account',
+        #     ) 
+        # if 'file_batch_size' in migration:
+        #     assistant.set_file_batch_size(migration['file_batch_size'])  
+        # migration_response = assistant.migrate() 
+        # if migration_response: 
+        #     assistant.notify_completion()   
+        # assistant.upload_logs_to_destination()  
+        # clear_logs(assistant)
+        migration_source = request.session.get('source_selected')
+        migration_source_type = migration_source['source_type']
+        del migration_source['source_type']
+        print('migration source')
+        print(migration_source)
+        migration_destination = request.session.get('destination_selected')
+        migration_destination_details = list(migration_destination.values())[0]
+        migration_destination_type = list(migration_destination.keys())[0]
+        new_migration = Migration(
+            user = request.user, 
+            google_source = {
+                'type': migration_source_type,
+                'details': migration_source
+            },
+            local_temp_dir = request.user.username,
+            target = {
+                'type': migration_destination_type,
+                'details': migration_destination_details
+            }
+        )
+        new_migration.save()
+
         # assistant = MigrationAssistant(
         #     verbose=True,
         #     migration={
@@ -39,9 +76,10 @@ class StartMigrationView(View, LoginRequiredMixin):
         #     name=f'MigrationAssistant-{request.user.username}',
         #     google_auth_method='oauth',
         # )
-        Migration(
+        # Migration(
 
-        )
+        # )
+        return redirect('list-migrations')
 
 
 class UseGoogleDriveFolderSourceView(View, LoginRequiredMixin):

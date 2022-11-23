@@ -7,6 +7,7 @@ from .sharepoint import SharePointUploader
 from .googledownloader import GoogleDownloader
 from .onedrive import OneDriveUploader
 from .base import BaseLogging 
+from .notif.notifier import Notifier
 
 class MigrationAssistant(BaseLogging):
     def __init__(
@@ -112,7 +113,7 @@ class MigrationAssistant(BaseLogging):
         self.migration_elapsed_time_seconds = self.format_elapsed_time_seconds(elapsed)
         return True 
 
-def clear_logs(assistant: Google2SharePointAssistant = None):
+def clear_logs(assistant: MigrationAssistant = None):
     print('Clearing logs')
     if assistant:
         assistant.shutdown_logging()

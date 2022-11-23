@@ -1,0 +1,25 @@
+Hi,
+
+This is an automated communication regarding the status of your Google Drive to OneDrive Migration. These file migrations are fully automated and we run them only after engaging with the owner(s) of the files to be migrated. 
+
+The migration of your Google Drive files (in the ${GOOGLE_SOURCE_NAME} ${GOOGLE_SOURCE_TYPE}) to your OneDrive ( https://go.cofc.edu/onedrive ) is now complete. This automated process took ${ELAPSED_TIME} to complete. 
+
+Please note that your files were merely copied to OneDrive, and no files were deleted from your Google Drive. You are responsible for the deletion of your own files from Google Drive to stay below the storage quota.  
+
+All in all, there were ${TOTAL_DRIVE_FILES} total migratable files in the Google Drive Source. ${NUM_FILES_MIGRATED} total files were migrated from your source to your destination. ${SKIPPED_MESSAGE} ${NUM_FILES_ALREADY_MIGRATED_MSG} 
+
+Please check your destination ( https://go.cofc.edu/onedrive ) to ensure that your files appear to have migrated successfully. 
+
+You will notice a folder called migration-logs next to your migrated files that contains all logs produced during the migration.  
+
+If you notice any issues, e.g., if any files are not in the destination that should have been migrated, please submit a Web Support Request ( https://cofc.teamdynamix.com/TDClient/1802/Portal/Requests/ServiceDet?ID=31202 ) with a detailed description of the problem, including: 
+
+1) the name of the drive or folder that was migrated, and 
+2) the file or files that seem to have been skipped. 
+
+This automation is managed by the Digital Communications Team, AKA the Web Team, in Information Technology. 
+
+Yours truly,
+The Digital Communications Team
+Information Technology
+College of Charleston
