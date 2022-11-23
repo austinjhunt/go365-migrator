@@ -17,7 +17,7 @@
               <th>
             </tr>
           </thead>
-          <tbody class="text-start" style="font-size:0.8rem">
+          <tbody class="text-start">
             {% for item in google_drive_content %}
             <tr data-name="{{item.name}}" data-id="{{item.id}}" data-mimetypefriendly="{{item.mimeTypeFriendly}}">
               <td>{{item.name}}</td>
@@ -26,7 +26,6 @@
                 <button
                   title="include this item in the migration"
                   class="btn btn-secondary btn-sm"
-                  style="font-size:0.8rem"
                   onclick="selectSourceForMigration(this)"
                 >
                   Select <i class="fa fa-arrow-right"></i>

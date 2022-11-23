@@ -15,7 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
     removeFadeOut(document.querySelector(".loader_container_wrapper"), 300);
   }, 1000);
   // initialize data tables
-  $(".datatable").DataTable({ pageLength: 5 });
+  $(".datatable").DataTable({
+    aaSorting: [] // disable initial sort
+  });
 
   // initialize toasts
   toasty = new bootstrap.Toast(document.querySelector('.toast'));

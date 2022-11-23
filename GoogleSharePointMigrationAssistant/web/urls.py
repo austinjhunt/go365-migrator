@@ -27,4 +27,10 @@ urlpatterns = [
     path('use-sharepoint-site-destination', UseSharePointSiteDestinationView.as_view(), name='use-sharepoint-site-destination'),
     path('use-onedrive-destination', UseOneDriveDestinationView.as_view(), name='use-onedrive-destination'),
 
+
+    # folder selection for onedrive destination
+    path('use-onedrive-folder-destination/<slug:folder_id>', UseOneDriveFolderDestinationView.as_view(), name='use-onedrive-folder-destination'), 
+
+
+    
 ]

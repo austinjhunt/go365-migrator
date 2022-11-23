@@ -1,10 +1,12 @@
 from django.views.generic import View 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render 
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import logging 
 import json
 from ..models import Migration
+from .util import get_user_onedrive_root_children
+
 logger = logging.getLogger(__name__)
 
 class ListMigrationsView(View, LoginRequiredMixin): 
@@ -25,13 +27,8 @@ class StartMigrationView(View, LoginRequiredMixin):
 class ConfirmMigrationSourcesView(View, LoginRequiredMixin):
     def post(self, request): 
         data = json.loads(request.body.decode("utf-8"))
-        logger.debug(request.POST)
-        logger.debug(request.__dict__)
         if 'selections' in data:
-            selections = data.get('selections')
-            logger.debug({'google_items_to_migrate': selections})
-            request.session['google_items_to_migrate'] = selections
-            request.session['source_selected'] = True 
+            request.session['source_selected'] = data.get('selections')
             data = {'success': 'selections_confirmed'}
         else: 
             data = {'error': 'selections not provided'}
@@ -51,5 +48,14 @@ class UseOneDriveDestinationView(View, LoginRequiredMixin):
         return render(
             request=request,
             template_name='destinations/onedrive.html',
-            context={}
+            context={
+                'folders': [el for el in get_user_onedrive_root_children(request) if 'folder' in el]
+            }
         )
+
+class UseOneDriveFolderDestinationView(View, LoginRequiredMixin):
+    def get(self, request, folder_id): 
+        request.session['destination_selected'] = {
+            'onedrive_folder': folder_id
+        }
+        return redirect('setup')

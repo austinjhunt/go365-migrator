@@ -2,6 +2,10 @@
 from .auth import SignUpView, CustomLoginView, LogoutView
 from .m365 import MicrosoftSingleSignOnView, MicrosoftSingleSignOnCallbackView
 from .base import HomeView
-from .migrations import ListMigrationsView, ConfirmMigrationSourcesView, UseOneDriveDestinationView, UseSharePointSiteDestinationView
+from .migrations import (
+    ListMigrationsView, ConfirmMigrationSourcesView, 
+    UseOneDriveDestinationView, UseSharePointSiteDestinationView,
+    UseOneDriveFolderDestinationView
+)
 from .setup import SetupView
 from .google import InitializeGoogleOAuthView, GoogleOAuthRedirectUri
