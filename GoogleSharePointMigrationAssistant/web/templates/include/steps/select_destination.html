@@ -1,7 +1,19 @@
 <div class="text-center h-100">
   <p class="lead">
-    Select a destination in your OneDrive account or in SharePoint (e.g., a
-    Document Library on a SharePoint site). This is the destination to which
-    your selected Google source will be migrated.
+    Where would you like your data to be migrated from Google Drive?
   </p>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12 col-md-6">
+        <a class="btn btn-lg btn-primary" href="{% url 'use-onedrive-destination' %}" title="use your onedrive account as the migration destination">
+          Migrate to My OneDrive
+        </a>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        <a class="btn btn-lg btn-warning" href="{% url 'use-sharepoint-site-destination' %}" title="use one of your sharepoint sites as the migration destination">
+          Migrate to a SharePoint Online Site
+        </a>
+      </div>
+    </div>
+  </div>
 </div>

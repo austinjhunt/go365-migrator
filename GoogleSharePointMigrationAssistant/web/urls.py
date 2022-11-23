@@ -20,5 +20,11 @@ urlpatterns = [
     path('init-google-auth', InitializeGoogleOAuthView.as_view(), name='init-google-auth'), 
     path('google-oauth-redirect-uri', GoogleOAuthRedirectUri.as_view(), name='google-oauth-redirect-uri'),
 
+    # migration source selection
     path('confirm-migration-sources/', ConfirmMigrationSourcesView.as_view(), name='confirm-migration-sources'),
+
+    # migration destination selection 
+    path('use-sharepoint-site-destination', UseSharePointSiteDestinationView.as_view(), name='use-sharepoint-site-destination'),
+    path('use-onedrive-destination', UseOneDriveDestinationView.as_view(), name='use-onedrive-destination'),
+
 ]

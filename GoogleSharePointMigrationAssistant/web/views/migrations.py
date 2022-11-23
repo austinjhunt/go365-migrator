@@ -36,3 +36,20 @@ class ConfirmMigrationSourcesView(View, LoginRequiredMixin):
         else: 
             data = {'error': 'selections not provided'}
         return JsonResponse(data)
+
+class UseSharePointSiteDestinationView(View, LoginRequiredMixin):
+    def get(self, request): 
+        return render(
+            request=request, 
+            template_name='destinations/sharepoint-sites.html',
+            context={}
+        )
+
+
+class UseOneDriveDestinationView(View, LoginRequiredMixin):
+    def get(self, request): 
+        return render(
+            request=request,
+            template_name='destinations/onedrive.html',
+            context={}
+        )
