@@ -1,0 +1,26 @@
+{% extends 'include/master.html' %} {% block content %}
+<div class="container text-center">
+  <p class="lead">
+    Select a document library on the SharePoint Site "<strong>{{site.displayName}}</strong>"" to which you would like to migrate your data.
+  </p>
+</div>
+<div class="container py-2 rounded">
+  <div class="search-container text-center">
+    <label for="filter-input">Filter out a specific document library</label>
+    <input class="form-control w-75 dynamic-filter m-1 m-auto mb-3" id="filter-input" data-searchingon="sharepoint-site-doclib-options">
+  </div>
+  <div class="row">
+    <div class="col-sm-12 rounded">
+      <div id="sharepoint-site-doclib-options">
+        {% for doclib in document_libraries %}
+        <a
+          title="use the document library {{doclib.displayName}} on the SharePoint site {{site.displayName}} ({{site.name}}) as the destination"
+          class="btn btn-primary btn-md rounded m-2"
+          href="{% url 'use-sharepoint-destination' site_id=site.id doclib_id=doclib.id %}"
+          >{{doclib.name}}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

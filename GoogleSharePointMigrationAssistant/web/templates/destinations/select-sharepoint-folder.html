@@ -1,0 +1,40 @@
+{% extends 'include/master.html' %} {% block content %}
+<div class="container text-center">
+  <p class="lead">
+    Select a child folder from the document library
+    "<strong>{{document_library.name}}</strong>" on the SharePoint Site
+    "<strong>{{site.displayName}}</strong>"" to which you would like to migrate
+    your data.
+  </p>
+</div>
+<div class="container py-2 rounded">
+  <div class="search-container text-center">
+    <label for="filter-input">Filter out a specific child folder</label>
+    <input
+      class="form-control w-75 dynamic-filter m-1 m-auto mb-3"
+      id="filter-input"
+      data-searchingon="sharepoint-site-doclib-options"
+    />
+  </div>
+  <div class="row">
+    <div class="col-sm-12 rounded">
+      <div id="sharepoint-site-doclib-options">
+        <a
+          title="use the root folder in document library {{document_library.displayName}} on the SharePoint site {{site.displayName}} ({{site.name}}) as the destination"
+          class="btn btn-primary btn-md rounded m-2"
+          href="{% url 'use-sharepoint-destination' site_id=site.id doclib_id=document_library.id folder_id='root' %}"
+          >Root Folder</a
+        >
+        {% for folder in children_folders %}
+        <a
+          title="use the folder {{folder.name}} in the document library {{document_library.displayName}} on the SharePoint site {{site.displayName}} ({{site.name}}) as the destination"
+          class="btn btn-primary btn-md rounded m-2"
+          href="{% url 'use-sharepoint-destination' site_id=site.id doclib_id=document_library.id folder_id=folder.id%}"
+          >{{folder.name}}</a
+        >
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

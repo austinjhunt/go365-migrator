@@ -66,6 +66,7 @@ def get_shared_drives(request, query=''):
         if 'drives' in data:
             for f in data['drives']:
                 f['mimeTypeFriendly'] = 'Shared Drive'
+                request.session[f'google_shared_drive_{f["id"]}'] = f
             return data['drives']
         else:
             logger.error({
@@ -79,7 +80,8 @@ def get_shared_drives(request, query=''):
 def get_files(request, query=''):
     with build('drive', 'v3',
                credentials=get_google_credentials_from_session(request)) as drive:
-        data = drive.files().list(q=query).execute()
+        data = drive.files().list(q=query, supportsAllDrives=True,
+                                  supportsTeamDrives=True, includeItemsFromAllDrives=True).execute()
         if 'files' in data:
             for f in data['files']:
                 if f['mimeType'] in MIMETYPES:
@@ -87,6 +89,8 @@ def get_files(request, query=''):
                 else:
                     f['mimeTypeFriendly'] = f['mimeType'].replace(
                         'application/', '')
+                if f['mimeType'] == 'application/vnd.google-apps.folder':
+                    request.session[f'google_folder_{f["id"]}'] = f
             return data['files']
         else:
             logger.error({
@@ -97,6 +101,19 @@ def get_files(request, query=''):
             return None
 
 
+def get_google_drive_content(request):
+    """ return a unioned list of both folders and shared drives """
+    
+    if 'google_drive_content2' in request.session:
+        google_drive_content = request.session.get('google_drive_content')
+    else:
+        google_drive_content = get_files(
+            request, query="mimeType='application/vnd.google-apps.folder'")
+        google_drive_content += get_shared_drives(request)
+        request.session['google_drive_content'] = google_drive_content
+    return google_drive_content
+
+
 def get_google_user_data(request):
     with build('drive', 'v3',  credentials=get_google_credentials_from_session(request)) as drive:
         data = drive.about().get(fields='user').execute()
@@ -105,7 +122,7 @@ def get_google_user_data(request):
             return data
         else:
             logger.error({
-                'get_google_user_data_response': data, 
+                'get_google_user_data_response': data,
                 'error': 'user_data_missing'
             })
             return None
@@ -134,7 +151,7 @@ class GoogleOAuthRedirectUri(View):
                 client_config=config.google_oauth_json_credentials,
                 scopes=settings.GCP_CLIENT_SCOPES)
             flow.redirect_uri = config.google_oauth_json_credentials['web']['redirect_uris'][0]
-       
+
             flow.fetch_token(
                 code=request.GET.get('code'),
             )

@@ -1,0 +1,59 @@
+{% extends 'include/master.html' %} {% block content %}
+<div class="container text-center mb-5">
+  <p class="lead">
+    Search for and then select the SharePoint Online site to which you would like to migrate your
+    data.
+  </p>
+  <form method="post">
+    {% csrf_token %} {{ form.non_field_errors }}
+    <input type="hidden" name="next" value="{{next}}" />
+    <div class="mb-3">
+      <label for="siteName">{{form.site_name.label }}</label>
+      {{ form.site_name }} {% if form.site_name.errors %}
+      {{form.site_name.errors}} {% endif %}
+    </div>
+    <button type="submit" class="btn btn-lg btn-primary mt-3">Search</button>
+  </form>
+</div>
+<div class="container py-2 text-dark rounded">
+  {% if sharepoint_sites|length > 1 %}
+  <div class="search-container text-center mb-3">
+    <label for="filter-input">Filter out something specific</label>
+    <input
+      class="form-control w-75 dynamic-filter m-1 m-auto"
+      id="filter-input"
+      data-searchingon="sharepoint-site-options"
+    />
+  </div>
+  <div class="row">
+    <div class="col-sm-12 rounded">
+      <p class="lead">
+        The following SharePoint Sites Match Your Query
+        <strong>{{site_name}}</strong>. Select one to use as the destination.
+      </p>
+      <div id="sharepoint-site-options">
+        {% for site in sharepoint_sites %}
+        <a
+          title="use the SharePoint site {{site.displayName}} ({{site.name}}) as the destination"
+          class="btn btn-primary btn-md rounded m-2"
+          href="{% url 'use-sharepoint-destination' site_id=site.id %}"
+          >{{site.displayName}}</a
+        >
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% elif sharepoint_sites|length == 1 %} 
+  {% for site in sharepoint_sites %}
+  <a
+    title="use the SharePoint site {{site.displayName}} ({{site.name}}) as the destination"
+    class="btn btn-primary btn-md rounded m-2"
+    href="{% url 'use-sharepoint-destination' site_id=site.id %}"
+    >{{site.displayName}}</a
+  >
+  {% endfor %} {% else %} {% if attempted %}
+  <p class="lead">No SharePoint sites matched your query.</p>
+  {% endif %} {% endif %}
+</div>
+<!-- then select a document library -->
+{% endblock %}

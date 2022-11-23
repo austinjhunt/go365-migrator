@@ -1,2 +1,2 @@
 from .auth import * 
-from .migrations import * 
+from .sharepoint import * 

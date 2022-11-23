@@ -1,4 +1,4 @@
-<div class="text-center h-100">
+<div class="text-center h-100 position-relative">
   <p class="lead">
     Where would you like your data to be migrated from Google Drive?
   </p>
@@ -10,10 +10,19 @@
         </a>
       </div>
       <div class="col-sm-12 col-md-6">
-        <a class="btn btn-lg btn-warning" href="{% url 'use-sharepoint-site-destination' %}" title="use one of your sharepoint sites as the migration destination">
+        <a class="btn btn-lg btn-success" href="{% url 'use-sharepoint-destination' %}" title="use one of your sharepoint sites as the migration destination">
           Migrate to a SharePoint Online Site
         </a>
       </div>
     </div>
+  </div>
+  <div class="position-absolute bottom-0 left-0 mb-0 text-start">
+    <a
+      href="{% url 'change-source' %}"
+      title="Change the migration source"
+      class="btn btn-md btn-warning"
+    >
+      <i class="fa fa-arrow-left"></i> Change Migration Source
+    </a>
   </div>
 </div>

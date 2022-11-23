@@ -1,19 +1,20 @@
-from base import BaseLogging
 import msal 
 import os  
 import time 
-from constants import (
-    ONEDRIVE_APP_CLIENT_ID, ONEDRIVE_APP_CLIENT_SECRET, 
-    ONEDRIVE_APP_TENANT_ID, MAX_UPLOAD_THREADS, 
-    MAX_GRAPH_REQUESTS_PER_MINUTE, ONE_MINUTE,
-    GRAPH_SLEEP_RETRY_SECONDS 
-)
 from ratelimit import sleep_and_retry, limits
 import requests
 import json  
 from urllib3.exceptions import ProtocolError
 from concurrent.futures import wait, ThreadPoolExecutor 
 from sanitize_filename import sanitize  
+
+from .constants import (
+    ONEDRIVE_APP_CLIENT_ID, ONEDRIVE_APP_CLIENT_SECRET, 
+    ONEDRIVE_APP_TENANT_ID, MAX_UPLOAD_THREADS, 
+    MAX_GRAPH_REQUESTS_PER_MINUTE, ONE_MINUTE,
+    GRAPH_SLEEP_RETRY_SECONDS 
+)
+from .base import BaseLogging
 
 class OneDriveUploader(BaseLogging):
     def __init__(self, 

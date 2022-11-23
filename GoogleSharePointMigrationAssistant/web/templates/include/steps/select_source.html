@@ -1,56 +1,37 @@
 <div class="text-center h-100">
   <p class="lead">
-    Select a source file, folder, or shared drive from your Google Drive. This
+    Select a source folder or shared drive from your Google Drive. This
     selection is the data that will be migrated.
   </p>
+
   <div class="container bg-light py-2 text-dark rounded">
+    <div class="search-container text-center">
+      <label for="filter-input">Filter out something specific</label>
+      <input class="form-control w-75 dynamic-filter m-1 m-auto" id="filter-input" data-searchingon="google-drive-source-options">
+    </div>
+    <p class="lead">Folders and Shared Drives in your Google Drive</p>
     <div class="row">
-      <div class="col-sm-12 col-md-6 rounded">
-        <table  id="google-file-options" class="datatable">
-          <thead>
-            <tr>
-              <th colspan="3"><p>Contents in your Google Drive</p></th>
-            </tr>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>
-            </tr>
-          </thead>
-          <tbody class="text-start">
-            {% for item in google_drive_content %}
-            <tr data-name="{{item.name}}" data-id="{{item.id}}" data-mimetypefriendly="{{item.mimeTypeFriendly}}">
-              <td>{{item.name}}</td>
-              <td>{{item.mimeTypeFriendly}}</td>
-              <td>
-                <button
-                  title="include this item in the migration"
-                  class="btn btn-secondary btn-sm"
-                  onclick="selectSourceForMigration(this)"
-                >
-                  Select <i class="fa fa-arrow-right"></i>
-                </button>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      <div class="col-sm-12 col-md-6 rounded">
-        <p>Items Selected for Migration</p>
-        <div id="google-file-selections">
+      <div class="col-sm-12 rounded"  style="max-height: 500px; overflow-y: scroll;">
+        <div id="google-drive-source-options">
+          {% for item in google_drive_content %}
+          {% if item.mimeTypeFriendly  == 'Shared Drive' %}
+          <a
+            title="use the {{f.name}} folder as the destination"
+            class="btn btn-primary btn-sm rounded m-2"
+            href="{% url 'use-google-drive-shared-drive-source' item_id=item.id %}"
+            >{{item.name}} ({{item.mimeTypeFriendly}})</a
+          >
+          {% elif item.mimeTypeFriendly  == 'Google Drive folder'  %}
+          <a
+            title="use the {{f.name}} folder as the destination"
+            class="btn btn-primary btn-sm rounded m-2"
+            href="{% url 'use-google-drive-folder-source' item_id=item.id %}"
+            >{{item.name}} ({{item.mimeTypeFriendly}})</a
+          >
+          {% endif %}
+          {% endfor %}
         </div>
       </div>
-    </div>
-    <div class="text-end p-2">
-      <button 
-      class="btn btn-md btn-primary"
-      onclick="confirmSelectedMigrationSources()">
-        <i class="fa fa-check"></i> Confirm Selections 
-    </button>
-      <a href="{% url 'setup' %}" title="Continue to next step" class="btn btn-success btn-md">
-        <i class="fa fa-arrow-right"></i> Continue to Next Step
-      </a>
     </div>
   </div>
 </div>

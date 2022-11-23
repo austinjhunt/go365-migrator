@@ -21,16 +21,26 @@ urlpatterns = [
     path('google-oauth-redirect-uri', GoogleOAuthRedirectUri.as_view(), name='google-oauth-redirect-uri'),
 
     # migration source selection
-    path('confirm-migration-sources/', ConfirmMigrationSourcesView.as_view(), name='confirm-migration-sources'),
+    path('use-google-drive-folder-source/<str:item_id>', UseGoogleDriveFolderSourceView.as_view(), name='use-google-drive-folder-source'),
+    path('use-google-drive-shared-drive-source/<str:item_id>', UseGoogleDriveFolderSourceView.as_view(), name='use-google-drive-shared-drive-source'),
+    path('change-source', ChangeSourceView.as_view(), name='change-source'),
 
     # migration destination selection 
-    path('use-sharepoint-site-destination', UseSharePointSiteDestinationView.as_view(), name='use-sharepoint-site-destination'),
+    path('change-destination', ChangeDestinationView.as_view(), name='change-destination'),
     path('use-onedrive-destination', UseOneDriveDestinationView.as_view(), name='use-onedrive-destination'),
 
+    # folder selection after doc lib selected for sharepoint destination
+    path('use-sharepoint-destination/<str:site_id>/<str:doclib_id>/<str:folder_id>', UseSharePointDestinationViewSet.as_view({'get': 'get_folder'}), name='use-sharepoint-destination'),
+    # document library selection after sharepoint site selection for sharepoint destination
+    path('use-sharepoint-destination/<str:site_id>/<str:doclib_id>', UseSharePointDestinationViewSet.as_view({'get': 'get_doclib'}), name='use-sharepoint-destination'),
+    # site selection for sharepoint destination 
+    path('use-sharepoint-destination/<str:site_id>', UseSharePointDestinationViewSet.as_view({'get': 'get_site'}), name='use-sharepoint-destination'),
+    # once sharepoint destination is selected
+    path('use-sharepoint-destination', UseSharePointDestinationView.as_view(), name='use-sharepoint-destination'),
 
-    # folder selection for onedrive destination
-    path('use-onedrive-folder-destination/<slug:folder_id>', UseOneDriveFolderDestinationView.as_view(), name='use-onedrive-folder-destination'), 
-
+  
 
     
+    # start migration
+    path('start-migration', StartMigrationView.as_view(), name='start-migration')
 ]

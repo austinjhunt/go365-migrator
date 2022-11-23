@@ -1,14 +1,12 @@
 import shutil   
-from base import BaseLogging 
 import time 
-import json   
-from notif.notifier import Notifier
-from constants import *  
-import time  
-from sharepoint import SharePointUploader
-from googledownloader import GoogleDownloader
-from onedrive import OneDriveUploader
-
+import json  
+import time   
+from .constants import *  
+from .sharepoint import SharePointUploader
+from .googledownloader import GoogleDownloader
+from .onedrive import OneDriveUploader
+from .base import BaseLogging 
 
 class MigrationAssistant(BaseLogging):
     def __init__(
@@ -16,7 +14,6 @@ class MigrationAssistant(BaseLogging):
         verbose: bool = False, 
         migration: dict = None, 
         name: str = 'MigrationAssistant',
-        google_auth_method: str = 'svc_account' # alternative: oauth, requires web browser
         ): 
         super().__init__(name=name, verbose=verbose)      
 
@@ -56,7 +53,6 @@ class MigrationAssistant(BaseLogging):
             uploader=self.uploader,
             local_temp_dir=self.local_temp_dir,
             file_batch_size=FILE_BATCH_SIZE, 
-            auth_method=google_auth_method,
             wait_for_confirmation_before_migrating=self.wait_for_confirmation_before_migrating
             )
 
@@ -140,7 +136,6 @@ if __name__ == '__main__':
             assistant = MigrationAssistant(
                 migration=migration, 
                 verbose=verbose,
-                google_auth_method='svc_account',
                 ) 
             if 'file_batch_size' in migration:
                 assistant.set_file_batch_size(migration['file_batch_size'])  

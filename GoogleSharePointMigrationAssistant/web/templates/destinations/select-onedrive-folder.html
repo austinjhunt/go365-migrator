@@ -5,14 +5,18 @@
     Please select the OneDrive folder to which you would like to migrate your
     Google Drive data.
   </p>
-  <div class="container bg-light py-2 text-dark rounded">
+  <div class="container bg-light py-2 rounded">
+    <div class="search-container text-center">
+      <label for="filter-input">Filter out something specific</label>
+      <input class="form-control w-75 dynamic-filter m-1 mb-3 m-auto" id="filter-input" data-searchingon="onedrive-folder-destination-options">
+    </div>
     <div class="row">
       <div class="col-sm-12 rounded">
         <p class="lead">Folders in your OneDrive</p>
         <div id="onedrive-folder-destination-options">
           <a
             title="use the root onedrive folder as the destination"
-            class="btn btn-primary btn-sm m-2"
+            class="btn btn-primary btn-md m-2"
             data-name="root"
             data-id="root"
             href="{% url 'use-onedrive-folder-destination' folder_id='root' %}"
@@ -21,7 +25,7 @@
           {% for f in folders %}
           <a
             title="use the {{f.name}} folder as the destination"
-            class="btn btn-primary btn-sm rounded m-2"
+            class="btn btn-primary btn-md rounded m-2"
             data-name="{{f.name}}"
             data-id="{{f.id}}"
             href="{% url 'use-onedrive-folder-destination' folder_id=f.id %}"

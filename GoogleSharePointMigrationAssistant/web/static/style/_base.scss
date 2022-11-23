@@ -4,10 +4,12 @@
 html,
 body {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   scroll-behavior: smooth;
 }
-
+div.page-content{
+  height:90vh;
+}
 html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -188,4 +190,15 @@ iframe {
 
 table.dataTable tbody th, table.dataTable tbody td {
   padding: 2px 2px;
+}
+
+a{ 
+  &.show {
+    display: inline-block;
+    transition: 0.2s linear;
+  }
+  &.hide {
+    display: none;
+    transition: 0.2s linear;
+  }
 }

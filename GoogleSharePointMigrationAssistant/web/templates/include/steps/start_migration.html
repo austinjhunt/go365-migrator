@@ -1,4 +1,38 @@
-<div class="text-center h-100">
+<div class="text-center h-100 position-relative">
   <p class="lead">
-      <p>Enqueue migration and monitor its progress.</p>
+    Click the link below to start migrating your data from
+    <strong>{{source_selected.name}} ({{source_selected.source_type}})</strong> in Google Drive 
+    to {% if destination_selected.sharepoint_folder %} the
+    <strong>{{destination_selected.sharepoint_folder.folder.name}}</strong> folder in
+    the document library
+    <strong
+      >{{destination_selected.sharepoint_folder.document_library.name}}</strong
+    >
+    on the SharePoint Online site
+    <a
+      href="{{destination_selected.sharepoint_folder.site.webUrl}}"
+      title="open the sharepoint site {{destination_selected.sharepoint_folder.site.displayName}}"
+      ><strong
+        >{{destination_selected.sharepoint_folder.site.displayName}}</strong
+      ></a>. 
+    {% elif destination_selected.onedrive_folder %}
+    the <strong>{{destination_selected.onedrive_folder.name}}</strong> folder in your OneDrive. {% endif %}
+    It will first be queued if there are other migration jobs already running.
+  </p>
+  <a
+    href="{% url 'start-migration' %}"
+    title="Start your data migration"
+    class="btn btn-lg btn-primary"
+  >
+    Start Migration
+  </a>
+  <div class="position-absolute bottom-0 left-0 mb-0 text-start">
+    <a
+      href="{% url 'change-destination' %}"
+      title="Change the migration destination"
+      class="btn btn-md btn-warning"
+    >
+      <i class="fa fa-arrow-left"></i> Change Migration Destination
+    </a>
+  </div>
 </div>

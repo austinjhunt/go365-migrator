@@ -1,6 +1,6 @@
 import logging 
 import os 
-from constants import LOG_FOLDER_PATH
+from .constants import LOG_FOLDER_PATH
 from datetime import timedelta
 from pathlib import PurePath
 

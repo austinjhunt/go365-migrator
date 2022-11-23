@@ -21,6 +21,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // initialize toasts
   toasty = new bootstrap.Toast(document.querySelector('.toast'));
+
+  // initialize search/filter inputs 
+  document.querySelector('#filter-input').addEventListener('input', (event) => {
+    let searchingOnId = event.target.dataset.searchingon;
+    let searchingOnElement = document.querySelector(`#${searchingOnId}`);
+    searchingOnElement.querySelectorAll('a').forEach(el=>{
+      if (el.textContent.toLowerCase().includes(event.target.value.toLowerCase())) {
+        el.classList.add('show'); el.classList.remove('hide');
+      } else {
+        el.classList.remove('show'); el.classList.add('hide');
+      }
+    })
+  })
 });
 
 let selectSourceForMigration = (btn) => {

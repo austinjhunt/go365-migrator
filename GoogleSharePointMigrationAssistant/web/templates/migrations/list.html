@@ -1,8 +1,12 @@
 {% extends 'include/master.html' %} {% block content %}
 <div class="container">
   <div class="row">
-    {% if migrations %} {% for migration in migrations %}
-    <div class="col-sm-12"></div>
+    {% if migrations %} 
+    <p class="lead">Your Data Migrations</p>
+    {% for mig in migrations %}
+    <div class="col-sm-12 d-flex justify-content-between">
+      <p>{{mig.friendly_description}}</p>
+    </div>
 
     {% endfor %} {% else %}
     <div class="col-sm-12 text-center">

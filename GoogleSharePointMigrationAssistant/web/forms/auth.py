@@ -46,22 +46,3 @@ class LoginForm(Form):
             attrs={'class': 'form-control',
                    'placeholder': 'Password', 'id': 'loginPassword'}
         ))
-
-class LoginForm(Form):
-    """
-    Custom login form, overwrites specific properties of AuthenticationForm 
-    (css classes)
-    """
-    username = CharField(
-        label="Username",
-
-        widget=TextInput(
-            attrs={'class': 'form-control',
-                   'placeholder': 'Username', 'id': 'loginUsername'},
-        ))
-    password = CharField(
-        label="Password",
-        widget=PasswordInput(
-            attrs={'class': 'form-control',
-                   'placeholder': 'Password', 'id': 'loginPassword'}
-        ))

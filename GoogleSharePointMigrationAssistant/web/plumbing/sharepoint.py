@@ -1,12 +1,12 @@
-from concurrent.futures import ThreadPoolExecutor, wait
-from base import BaseLogging
 import os
+import time
 from pathlib import PurePath  
+from concurrent.futures import ThreadPoolExecutor, wait
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext  
-import time 
-from constants import SHAREPOINT_APP_CLIENT_ID, SHAREPOINT_APP_CLIENT_SECRET, MAX_UPLOAD_THREADS
- 
+from .constants import SHAREPOINT_APP_CLIENT_ID, SHAREPOINT_APP_CLIENT_SECRET, MAX_UPLOAD_THREADS
+from .base import BaseLogging
+
 class SharePointUploader(BaseLogging): 
     def __init__(self, 
         local_folder_base_path: str = '', 
