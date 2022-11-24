@@ -93,7 +93,7 @@ class Migration(models.Model):
         return self.google_source["details"]["name"]
     
     @property 
-    def google_source_id(self):
+    def source_id(self):
         return self.google_source["details"]["id"]
 
     @property 

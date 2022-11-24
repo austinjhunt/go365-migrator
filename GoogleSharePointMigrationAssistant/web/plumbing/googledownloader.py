@@ -2,9 +2,7 @@ from asyncio import ALL_COMPLETED
 from google_auth_httplib2 import AuthorizedHttp
 from googleapiclient.http import MediaIoBaseDownload, HttpRequest, HttpError 
 from google.oauth2.service_account import Credentials as CredentialsSVCAccount
-from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials as CredentialsOauth
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build 
 from ratelimit import limits, sleep_and_retry 
 from sanitize_filename import sanitize
@@ -14,17 +12,16 @@ import math
 import time 
 import shutil 
 import os
-import json 
+from ..models import AdministrationSettings, Migration
 from .base import BaseLogging
 from .constants import (
-    GOOGLE_DRIVE_OAUTH_CREDS, GOOGLE_DRIVE_SVCACCOUNT_AUTH, 
     GOOGLE_DRIVE_SLEEP_RETRY_SECONDS, 
     MAX_GOOGLE_DRIVE_QUERIES_PER_ONE_HUNDRED_SECONDS,
-    ONE_HUNDRED_SECONDS
+    ONE_HUNDRED_SECONDS, DEFAULT_PAGESIZE, MAX_DOWNLOAD_THREADS,
+    MAX_LIST_THREADS
 )
 
-# self\.[^(info)(debug)]
-class GoogleDownloader(BaseLogging):
+class GoogleToSharePoint(BaseLogging):
     def __init__(self, 
     verbose: bool = False, 
     uploader = None , # sharepoint uploader or onedrive uploader  
@@ -32,15 +29,17 @@ class GoogleDownloader(BaseLogging):
     file_batch_size: int = 100, 
     name: str = 'GoogleDownloader',
     auth_method: str = 'svc_account', # alternative is 'oauth',
-    wait_for_confirmation_before_migrating: bool = True 
+    migration: Migration = None, 
+    request: HttpRequest = None,
     ): 
         super().__init__(name=name, verbose=verbose)
+        self.admin_config = AdministrationSettings.objects.first()
+        self.migration = migration
         self.file_batch_size = file_batch_size
         self.scopes = ['https://www.googleapis.com/auth/drive.readonly'] 
         self.folder_type = 'application/vnd.google-apps.folder'  
-        self.wait_for_confirmation_before_migrating = wait_for_confirmation_before_migrating
         self.uploader = uploader
-
+        self.request = request
         # init 
         self.num_files_already_in_destination = 0
         self.local_temp_dir = os.path.join(os.path.dirname(__file__), local_temp_dir)
@@ -53,18 +52,29 @@ class GoogleDownloader(BaseLogging):
         self.num_files_failed_to_download = 0 
         self.total_drive_files = 0 
         self.num_active_downloads = 0
-        self.setup_connection(auth_method=auth_method) 
-        self.info( f"Google Downloader created with default file batch size of {self.file_batch_size}") 
+        self.setup_service(auth_method=auth_method) 
+        self.info({
+            'google_downloader__init__': 'initialized successfully'
+        })
  
 
-    def _setup_connection_svc_account(self): 
-        """ Set up a connection to google drive """
-        self.info("Connecting with Google Drive via SVC Account")  
-        try:  
-            self.creds = None 
-            self.creds = CredentialsSVCAccount.from_service_account_info(
-                GOOGLE_DRIVE_SVCACCOUNT_AUTH, scopes=self.scopes
+    def _get_google_credentials_from_session(self):
+        """ Alternative to service account credentials. Use self.request to pull google creds from session. """
+        return CredentialsOauth(**self.request.session.get('google_credentials'))
+    
+    def _get_google_credentials_from_svc_account_config(self):
+        """ Alternative to Oauth session. Use Service account configuration for creating connection."""
+        return CredentialsSVCAccount.from_service_account_info(
+                self.admin_config.google_service_account_auth_json_credentials, 
+                scopes=self.scopes
             )
+
+    def setup_service(self, auth_method: str = 'oauth'):
+        if auth_method == 'svc_account': 
+            self.creds = self._get_google_credentials_from_svc_account_config()
+        elif auth_method == 'oauth':
+            self.creds = self._get_google_credentials_from_session()
+        try:  
             def build_request(http=None, *args, **kwargs):
                 """ 
                 Create a new Http() object for every request since  
@@ -75,80 +85,16 @@ class GoogleDownloader(BaseLogging):
             self.build_request = build_request
             authorized_http = AuthorizedHttp(self.creds, http=httplib2.Http())
             self.service = build('drive', 'v3', requestBuilder=build_request, http=authorized_http) 
-            self.info("Connected.")   
+            self.debug({
+                'google_drive_downloader_service': self.service.__dict__
+            })
         except Exception as e:
             self.error("Error connecting to Google Drive")
             self.error(e) 
-
-    def _setup_connection_oauth(self): 
-        """ Set up a connection to google drive via oauth with user sign in """
-        self.info("Connecting with Google Drive via Oauth")  
-        try:
-            creds = None
-            # The file token.json stores the user's access and refresh tokens, and is
-            # created automatically when the authorization flow completes for the first
-            # time.   
-            if os.path.exists(TOKEN_JSON):
-                self.info('Getting creds')
-                try:
-                    creds = CredentialsOauth.from_authorized_user_file(TOKEN_JSON, self.scopes)
-                except Exception as e: 
-                    creds = None 
-            # If there are no (valid) credentials available, let the user log in.
-            if not creds or not creds.valid:
-                self.debug('creds null or not valid')
-                if creds and creds.expired and creds.refresh_token:
-                    self.debug('creds exist, but are expired and contain refresh token')
-                    creds.refresh(Request())
-                else:
-                    self.debug('creating app flow from credentials.json') 
-                    
-                    # OAuth 
-                    with open(CREDENTIALS_JSON, 'w') as f:
-                        json.dump(GOOGLE_DRIVE_OAUTH_CREDS, f)
-
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        os.path.join(PARENT_PATH, 'credentials.json'), self.scopes)
-                    
-                    self.creds = flow.run_local_server(
-                        port=8080,
-                        access_type='offline', 
-                        prompt='consent' )
-                # Save the credentials for the next run
-                self.debug('Saving creds for next run')
-                with open(TOKEN_JSON, 'w') as token:
-                    token.write(creds.to_json())
-            self.info('Creating connection with credentials')
-             
-            def build_request(http, *args, **kwargs):
-                """ 
-                Create a new Http() object for every request since  
-                httplib2 not threadsafe inherently.  
-                """
-                new_http = AuthorizedHttp(self.creds, http=httplib2.Http())
-                return HttpRequest(new_http, *args, **kwargs)
-            self.build_request = build_request
-            authorized_http = AuthorizedHttp(self.creds, http=httplib2.Http())
-            self.service = build('drive', 'v3', requestBuilder=build_request, http=authorized_http) 
-            self.info("Connected.")
-
-        except Exception as e:
-            self.error("Error connecting to Google Drive")
-            self.error(e) 
-
-
-    def setup_connection(self, auth_method: str = 'svc_account'):
-        self.info(f'Setting up connection with auth method: {auth_method}')  
-        if auth_method == 'oauth': 
-            self._setup_connection_oauth()
-
-        elif auth_method == 'svc_account': 
-            self._setup_connection_svc_account()
-
-    
 
     def file_is_migratable(self, file): 
-        """ return whether file is migratable """ 
+        """ Determine whether a given file is migratable. 
+        Certain mimetypes not migratable to M365 environment. """ 
         non_migratable_mimetypes = [
             'application/vnd.google-apps.form',
             'application/vnd.google-apps.shortcut'
@@ -174,6 +120,7 @@ class GoogleDownloader(BaseLogging):
             return True
 
     def convert_size(self, size_bytes):
+        """ Convert size in bytes to size in friendly format. """
         if isinstance(size_bytes, str): 
             size_bytes = int(size_bytes)
         
@@ -186,6 +133,10 @@ class GoogleDownloader(BaseLogging):
         return "%s %s" % (s, size_name[i])
 
     def set_file_batch_size(self, fbs):
+        """ Set the file batch size. I.e., how many files to download per batch. 
+        With larger files, better to use smaller batch size to not overload 
+        local file system (IF USING local file system. Less relevant for S3 intermediate storage)."""
+
         self.file_batch_size = fbs
         self.info(f'File batch size set to {fbs}')
 
@@ -224,41 +175,6 @@ class GoogleDownloader(BaseLogging):
                 result = self.getlist(entity, query, **kwargs)  
         return result  
         
-    def get_shared_drive_by_name(self, name, fields: str = '*'):  
-        # fields param: https://developers.google.com/drive/api/guides/fields-parameter
-        query = f"name = '{name}'"
-        entries = self.getlist(
-            entity='drives', 
-            query=query, 
-            **{
-                'pageSize': 5,
-                'fields': f'drives({fields})'
-                })
-        if 'drives' in entries and len(entries['drives']) > 0: 
-            return entries['drives'][0]
-        else:
-            return None   
-    
-    def get_folder_by_name(self, folder_name, fields: str = '*'): 
-        # fields param: https://developers.google.com/drive/api/guides/fields-parameter
-        query = f"name = '{folder_name}' and trashed = false and mimeType='{self.folder_type}'"
-        folders = self.getlist(
-            entity='files', 
-            query=query, 
-            **{
-                'supportsAllDrives': True,
-                'supportsTeamDrives': True,
-                'includeTeamDriveItems': True, 
-                'includeItemsFromAllDrives': True,   
-                'corpora': 'user',  
-                'fields': f'files({fields})'
-            })
-        response = None 
-        if 'files' in folders and len(folders['files']) > 0: 
-            response = folders['files'][0]
-        else: 
-            self.error(f'No folders found matching name {folder_name}')
-        return response 
 
     @sleep_and_retry
     @limits(calls=MAX_GOOGLE_DRIVE_QUERIES_PER_ONE_HUNDRED_SECONDS, period=ONE_HUNDRED_SECONDS)
@@ -334,11 +250,11 @@ class GoogleDownloader(BaseLogging):
             self._download_worker(file_name, dest_folder=file['parent_folder_local_path'], request=request, too_large=too_large)  
         return file 
     
-    def upload_and_delete(self):  
+    def _upload_and_delete(self):  
+        self.debug({'_upload_and_delete': 'beginning upload'})
         self.uploader_running = True 
-        self.info(f"Beginning Upload") 
         while self.num_active_downloads > 0: 
-            self.info(f"Waiting for ({self.num_active_downloads}) active download threads to finish ") 
+            self.debug({'_upload_and_delete': f"Waiting for ({self.num_active_downloads}) active download threads to finish"})
             time.sleep(3) 
         self.uploader.set_todo_count(total_files_to_upload=self.total_drive_files)
         self.uploader.upload(local_folder_base_path=self.local_temp_dir)
@@ -346,7 +262,7 @@ class GoogleDownloader(BaseLogging):
             shutil.rmtree(self.local_temp_dir)
         except Exception as e: 
             self.error(e) 
-        self.info("Resetting current batch to 0, uploader finished running")
+        self.debug({'_upload_and_delete': "batch upload and delete complete"})
         self.current_batch_downloaded = 0 
         self.uploader_running = False   
 
@@ -356,7 +272,7 @@ class GoogleDownloader(BaseLogging):
             file_name = sanitize(file_name)
             os.makedirs(dest_folder, exist_ok=True)
             filepath = os.path.join(dest_folder, file_name)
-            self.info(f"Downloading file {file_name} ({self.num_files_downloaded + 1}/{self.total_drive_files})")   
+            self.info({'_download_worker': f"Downloading file {file_name} ({self.num_files_downloaded + 1}/{self.total_drive_files})"})   
             with open(filepath, "wb") as wer:
                 if not too_large:
                     # request is normal HttpRequest
@@ -366,17 +282,20 @@ class GoogleDownloader(BaseLogging):
                         while done is False:
                             status, done = downloader.next_chunk()
                             if status is not None and (status.total_size is not None and status.resumable_progress is not None):
-                                self.info("\rDownload %s (%s/%s): %d%%." % (file_name, self.sizeof_fmt(status.total_size), self.sizeof_fmt(status.resumable_progress), int(status.progress() * 100)))
+                                self.info({
+                                    '_download_worker': "\rDownload %s (%s/%s): %d%%." % (file_name, self.sizeof_fmt(status.total_size), self.sizeof_fmt(status.resumable_progress), int(status.progress() * 100))})
+                             
                     except HttpError as e:
-                        self.info(f'Error when downloading: {str(e)}') 
+                        self.error({'_download_worker': f'error when downloading; {str(e)}'}) 
                 else:
                     # request is URL from exportLinks
-                    self.info(f'Downloading file {file_name} from exportLink {request}') 
+                    self.info(
+                        {'_download_worker': f'downloading {file_name} from exportLink {request}'}) 
                     authorized_http = AuthorizedHttp(self.creds, http=httplib2.Http()) 
                     def postproc(response, content):
                         return response, content
                     request = self.build_request(http=authorized_http, uri=request, postproc=postproc)
-                    response, content = request.execute()
+                    _, content = request.execute()
                     wer.write(content)  
                 self.num_files_downloaded += 1 
                 self.current_batch_downloaded += 1  
@@ -452,6 +371,7 @@ class GoogleDownloader(BaseLogging):
         return f'{round(r,2) * 100}%'   
 
     def _get_batch_for_download_from_files_list(self, files_list: list = []):   
+        """ pops batch_size items from list at a time which prevents infinite loop. """
         batch = []
         self.info(f'getting batch for download from files list of length {len(files_list)}')
         while len(batch) < self.file_batch_size and len(files_list) > 0:
@@ -497,7 +417,10 @@ class GoogleDownloader(BaseLogging):
                 ext = '.pdf'
         return ext 
 
-    def get_flattened_files_list_in_folder(self, folder: dict = {}, parent_folder_local_path: str = ''): 
+    def _get_flattened_files_list_in_folder(self, folder: dict = {}, parent_folder_local_path: str = ''): 
+        """ Traverse entire recursive hierarchy in folder and build/return a flattened
+        list of files within """
+        self.info({'_get_flattened_files_list_in_folde': 'collecting files list'}) 
         files_list = []
         folder_name = sanitize(folder['name'])
         new_parent_folder_local_path = os.path.join(parent_folder_local_path, folder_name)
@@ -527,7 +450,7 @@ class GoogleDownloader(BaseLogging):
         with ThreadPoolExecutor(max_workers=MAX_LIST_THREADS) as executor: 
             futures = [
                 executor.submit(
-                    self.get_flattened_files_list_in_folder,
+                    self._get_flattened_files_list_in_folder,
                     f, 
                     new_parent_folder_local_path
                     ) for f in children_folders
@@ -536,8 +459,9 @@ class GoogleDownloader(BaseLogging):
                 files_list.extend(future.result()) 
         return files_list 
 
-    def get_flattened_files_list_in_drive(self, drive_id: str = ''): 
-        """ similar to get_flattened_files_list_in_folder but starts at the drive level """
+    def _get_flattened_files_list_in_drive(self, drive_id: str = ''): 
+        """ Traverse entire recursive hierarchy in drive and build/return a flattened
+        list of files within; similar to get_flattened_files_list_in_folder but starts at the drive level """
         files_list = []
         drive_children = self.get_children_from_drive(drive_id)
         files, folders = drive_children['files'], drive_children['folders']  
@@ -546,19 +470,19 @@ class GoogleDownloader(BaseLogging):
             f'file children and {len(folders)} folder children'
             )      
         for f in files:
-            if self.file_is_migratable(f) and not self.file_already_migrated(f):
+            if self.file_is_migratable(f) and not self._file_already_migrated(f):
                 self.total_drive_files += 1
                 f['parent_folder_local_path'] =  self.local_temp_dir
                 f['name'] = f'{f["name"]}{self.get_o365_extension_from_file_mimetype(f["mimeType"])}' 
                 files_list.append(f)  
         with ThreadPoolExecutor(max_workers=MAX_LIST_THREADS) as executor: 
             futures = [
-                executor.submit(self.get_flattened_files_list_in_folder, f) for f in folders]   
+                executor.submit(self._get_flattened_files_list_in_folder, f) for f in folders]   
             for future in wait(futures, return_when=ALL_COMPLETED).done: 
                 files_list.extend(future.result()) # extend for one long flat list of files.
         return files_list   
  
-    def file_already_migrated(self, file: dict = {}, target_files_dict: list = []): 
+    def _file_already_migrated(self, file: dict = {}, target_files_dict: list = []): 
         """ return whether file has already been migrated. if
         it is already migrated then there should be a key in the target files dict with format:
         f'PARENT<{local_folder_base_path}>PARENT--FILENAME<{f["name"]}>FILENAME'
@@ -574,83 +498,73 @@ class GoogleDownloader(BaseLogging):
             self.num_files_already_in_destination += 1 
         return already_migrated
 
-    def exclude_files_already_migrated_from_source_file_list(self, 
+    def _exclude_files_already_migrated_from_source_file_list(self, 
         source_file_list: list = []):  
-        self.info(f'Excluding files already migrated.')
-        self.info('Collecting list of files already in target.') 
+        """ Do not re-migrate files that are already in the target. 
+        Obtain a list of what's in the target. Exclude those from current list
+        files to migrate. """
+        self.info({'_exclude_files_already_migrated_from_source_file_list': 'Collecting list of files already in target.'})
         target_files_dict = self.uploader.get_flattened_files_dict_in_remote_folder(
             local_folder_base_path=self.local_temp_dir
         ) 
-        self.info('Target files list acquired.')
+        self.info({'_exclude_files_already_migrated_from_source_file_list': 'already-uploaded files list acquired'})
         return [
-            f for f in source_file_list if not self.file_already_migrated(
+            f for f in source_file_list if not self._file_already_migrated(
                 file=f, target_files_dict=target_files_dict)
         ]
 
-    def _download_shared_drive(self, entity_name=''):
-        self.info(f'Downloading Shared Drive: {entity_name}') 
-        drive = self.get_shared_drive_by_name(entity_name) 
-        if self.wait_for_confirmation_before_migrating and not self._confirm(entity_type='shared_drive', entity=drive):
-            return False  
-        google_files_list = self.get_flattened_files_list_in_drive(drive_id=drive['id'])  
-        google_files_list = self.exclude_files_already_migrated_from_source_file_list(
+    def _migrate_files_list(self, flattened_files_list: list = []):
+        """ Download a shared drive recursively. """
+        self.debug({'_download_files_list': flattened_files_list})
+        return self._migrate_files_list_in_batches(
+            files_list=flattened_files_list
+            )
+
+    def _scan_shared_drive(self):
+        """ Scan (do not download/migrate) a shared drive recursively. """
+        self.debug({'_scan_shared_drive': self.migration.source_id}) 
+        google_files_list = self._get_flattened_files_list_in_drive(drive_id=self.migration.source_id)  
+        google_files_list = self._exclude_files_already_migrated_from_source_file_list(
             google_files_list
             )
-        return self.migrate_files_list_in_batches(files_list=google_files_list)
+        return google_files_list
 
-    def _download_folder(self, entity_name: str = ''): 
-        f = self.get_folder_by_name(entity_name)
-        if self.wait_for_confirmation_before_migrating and not self._confirm(entity_type='folder', entity=f):
-            return False   
-        self.info(f'Collecting list of files in source folder') 
-        google_files_list = self.get_flattened_files_list_in_folder(
-            folder=f, parent_folder_local_path=os.path.dirname(self.local_temp_dir))
-        self.info(f'Source list acquired.')
-        google_files_list = self.exclude_files_already_migrated_from_source_file_list(
+    def _scan_folder(self):
+        """ Scan (do not download/migrate) a folder recursively. """
+        self.info({'_scan_folder': self.migration.source_id})
+        google_files_list = self._get_flattened_files_list_in_folder(
+            folder=self.migration.google_source['details'],
+            parent_folder_local_path=os.path.dirname(self.local_temp_dir)
+            )
+        google_files_list = self._exclude_files_already_migrated_from_source_file_list(
             google_files_list
         ) 
-        return self.migrate_files_list_in_batches(files_list=google_files_list)
+        return google_files_list
 
-    def download_file_batch(self, files_list : list = []):
+    def _download_file_batch(self, files_list : list = []):
+        self.info({'_download_file_batch': 'starting download threadpool'})
         with ThreadPoolExecutor(max_workers=MAX_DOWNLOAD_THREADS) as executor: 
             futures = [executor.submit(self.download_file, f) for f in files_list]
             for fut in wait(futures, return_when=ALL_COMPLETED).done:
-                self.info(f'File downloaded: {fut.result()["name"]}') 
+                self.info({'_download_file_batch': f'File downloaded: {fut.result()["name"]}'})
 
-    def migrate_files_list_in_batches(self, files_list: list = []):
+    def _migrate_files_list_in_batches(self, files_list: list = []):
         while len(files_list) > 0: 
-            self.info(f"Files still left for migration. Progress so far: {self.get_progress()}")
+            self.debug({'_migrate_files_list_in_batches': f'files_still_left,progress={self.get_progress()}'})
             batch = self._get_batch_for_download_from_files_list(
                 files_list=files_list
             ) # pops batch_size items from list at a time which prevents infinite loop.
-            self.info(f'Collected file batch of size {len(batch)}. Beginning download') 
-            self.download_file_batch(batch)
-            self.info(f'Batch download complete. Beginning SharePoint Upload.')
-            self.upload_and_delete() 
+            self.debug({'_migrate_files_list_in_batches': f'collected batch of {len(batch)} files; starting download'})
+            self._download_file_batch(batch)
+            self.debug({'_migrate_files_list_in_batches': f'batch download complete; starting SharePoint upload'})
+            self._upload_and_delete() 
         return True
 
-    def download(self, entity_type='shared_drive', entity_name=''):
+    def migrate(self, entity_type='shared_drive', entity_name=''):
         if entity_type == 'shared_drive':     
             response = self._download_shared_drive(entity_name=entity_name) 
         elif entity_type == 'folder': 
             response = self._download_folder(entity_name=entity_name)
         return response 
 
-if __name__ == "__main__": 
-    # downloader = GoogleDownloader(
-    #     verbose=True, 
-    #     uploader=None,
-    #     local_temp_dir='',
-    #     file_batch_size=5, 
-    #     name='GoogleDownloader', 
-    #     auth_method='svc_account'
-    # )
-    # folder = downloader.get_folder_by_name('PagnottaMigrateToOneDrive')
-    # downloader.info('got folder:')
-    # downloader.info(folder) 
-
-    d = GoogleDownloader(verbose=True, uploader=None, local_temp_dir='', file_batch_size=5, auth_method='svc_account', wait_for_confirmation_before_migrating=True)
-    folder = d.get_folder_by_name('PagnottaMigrateToOneDrive')
-    print(folder)
-    count = d.count_migratable_files_in_folder(folder)
-    print(f'Migratable file count = {count}')
+    

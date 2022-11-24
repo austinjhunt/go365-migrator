@@ -53,7 +53,7 @@ class StartMigrationView(View, LoginRequiredMixin):
         migration_destination = request.session.get('destination_selected')
         migration_destination_details = list(migration_destination.values())[0]
         migration_destination_type = list(migration_destination.keys())[0]
-        new_migration = Migration(
+        migration = Migration(
             user = request.user, 
             google_source = {
                 'type': migration_source_type,
@@ -65,19 +65,17 @@ class StartMigrationView(View, LoginRequiredMixin):
                 'details': migration_destination_details
             }
         )
-        new_migration.save()
+        migration.save()
+        assistant = MigrationAssistant(
+            migration=migration, 
+            name=f'Migration-{request.user.username}', 
+            request=request
+            )
+        migration_response = assistant.migrate()
+        if migration_response:
+            assistant.notify_completion()
+        assistant.scan()
 
-        # assistant = MigrationAssistant(
-        #     verbose=True,
-        #     migration={
-
-        #     },
-        #     name=f'MigrationAssistant-{request.user.username}',
-        #     google_auth_method='oauth',
-        # )
-        # Migration(
-
-        # )
         return redirect('list-migrations')
 
 

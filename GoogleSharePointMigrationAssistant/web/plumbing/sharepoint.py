@@ -43,6 +43,9 @@ class SharePointUploader(BaseLogging):
         use_multithreading=False 
     ):
         """ allow reconfiguration of existing uploader objects """
+
+    
+
         self.use_multithreading = use_multithreading
         self.num_completed_uploads = 0 
         self.local_folder_base_path = local_folder_base_path

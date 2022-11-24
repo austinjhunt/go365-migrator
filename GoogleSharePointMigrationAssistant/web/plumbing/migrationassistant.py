@@ -1,60 +1,62 @@
 import shutil   
 import time 
-import json  
-import time   
+import time  
+from django.http import HttpRequest
 from .constants import *  
 from .sharepoint import SharePointUploader
-from .googledownloader import GoogleDownloader
+from .googledownloader import GoogleToSharePoint
 from .onedrive import OneDriveUploader
 from .base import BaseLogging 
 from .notif.notifier import Notifier
+from ..models import Migration
 
 class MigrationAssistant(BaseLogging):
     def __init__(
         self,
         verbose: bool = False, 
-        migration: dict = None, 
+        migration: Migration = None,
         name: str = 'MigrationAssistant',
+        request: HttpRequest = None
         ): 
         super().__init__(name=name, verbose=verbose)      
-
-        # parse migration map 
         self.migration = migration
-        self.local_temp_dir = migration['local_temp_dir'] 
-        self.google_source_name = migration['google_source_name']
-        self.google_source_type = migration['google_source_type'] 
-        self.notify_stakeholders = migration['notify_stakeholders']
-        self.wait_for_confirmation_before_migrating = migration['wait_for_confirmation_before_migrating']
-        self.target_type = migration['target_type'] 
+        self.request = request
+        # FIXME: Use S3
+        self.local_temp_dir = name.lower().replace(' ', '')
+        self.notify_stakeholders = [{
+            "name": f'{self.request.user.first_name} {self.request.user.last_name}', #FIXME - need to populate name with SSO 
+            "email": self.request.user.email #fix me too
+        }]
 
         self.migration_elapsed_time_seconds = 0 
         self.file_batch_size = FILE_BATCH_SIZE   
 
-        if self.target_type == 'sharepoint_site':   
-            self.target_sharepoint_site = migration['target_sharepoint_site']
+        if self.migration.target_type == 'sharepoint_folder':   
             self.target_document_library = migration['target_document_library']
             self.target_folder = migration['target_folder'] 
             self.uploader = SharePointUploader(
                 local_folder_base_path=self.local_temp_dir,
-                target_sharepoint_site_url=self.target_sharepoint_site,
-                target_document_library_name=self.target_document_library,
-                target_base_folder=self.target_folder,
+                target_sharepoint_site_url=self.migration.target_site_url,
+                target_document_library_name=self.migration.target_document_library_name,
+                target_base_folder=self.migration.target_folder_name, # possible problem
                 use_multithreading=False,
                 verbose=verbose
             ) 
-        elif self.target_type == 'onedrive': 
+
+        elif self.migration.target_type == 'onedrive_folder': 
             self.uploader = OneDriveUploader(
                 verbose=verbose, 
                 local_folder_base_path=self.local_temp_dir,
-                username=migration['target_onedrive_username']
+                username=self.request.user.username
             )
             
-        self.downloader = GoogleDownloader(
+        self.downloader = GoogleToSharePoint(
             verbose=verbose, 
             uploader=self.uploader,
             local_temp_dir=self.local_temp_dir,
-            file_batch_size=FILE_BATCH_SIZE, 
-            wait_for_confirmation_before_migrating=self.wait_for_confirmation_before_migrating
+            file_batch_size=FILE_BATCH_SIZE,
+            migration=self.migration,
+            request=self.request 
             )
 
     def set_file_batch_size(self, fbs):
@@ -72,6 +74,7 @@ class MigrationAssistant(BaseLogging):
             total_drive_files=self.downloader.total_drive_files, 
             elapsed_time=self.migration_elapsed_time_seconds) 
 
+
     def upload_logs_to_destination(self):
         """ 
         Log files are going to get big. When migration is finished, upload 
@@ -81,16 +84,17 @@ class MigrationAssistant(BaseLogging):
         self.shutdown_logging()
         self.uploader.shutdown_logging()  
         self.notifier.shutdown_logging() 
-        if self.target_type == 'sharepoint_site':
+        if self.migration.target_type == 'sharepoint_folder':
             self.uploader.configure(
                 local_folder_base_path=LOG_FOLDER_PATH,
-                target_sharepoint_site_url=self.target_sharepoint_site, 
-                target_document_library_name=self.target_document_library,
-                target_base_folder=f'{self.target_folder}/{self.local_temp_dir.split("/")[-1]}',
+                target_sharepoint_site_url=self.migration.target_site_url, 
+                target_document_library_name=self.migration.target_document_library_name,
+                target_base_folder=f'{self.migration.target_folder_name}/{self.local_temp_dir.split("/")[-1]}',
                 use_multithreading=True
             )
             self.uploader.upload(local_folder_base_path=LOG_FOLDER_PATH) 
-        elif self.target_type == 'onedrive': 
+
+        elif self.migration.target_type == 'onedrive_folder': 
             self.uploader.num_completed_uploads = 0 
             self.uploader.upload(
                 local_folder_base_path=LOG_FOLDER_PATH
@@ -100,8 +104,8 @@ class MigrationAssistant(BaseLogging):
         start = time.time()
         # possible source types: file, folder, user_drive, shared_drive
         response = self.downloader.download(
-            entity_type=self.google_source_type,
-            entity_name=self.google_source_name
+            entity_type=self.migration.source_type,
+            entity_name=self.migration.source_name
         ) 
         if not response: 
             return False 
@@ -112,6 +116,9 @@ class MigrationAssistant(BaseLogging):
         elapsed = end - start
         self.migration_elapsed_time_seconds = self.format_elapsed_time_seconds(elapsed)
         return True 
+
+    def scan_source(self):
+        return self.downloader.
 
 def clear_logs(assistant: MigrationAssistant = None):
     print('Clearing logs')
@@ -125,23 +132,3 @@ def clear_logs(assistant: MigrationAssistant = None):
         print(f'Failed to remove log directory {LOG_FOLDER_PATH}')
         print(e)
     time.sleep(1)
-
-if __name__ == '__main__': 
-    migration_map = None    
-    with open('map.json', 'r') as f: 
-        migration_map = json.load(f)
-    if migration_map:
-        for migration in migration_map: 
-            clear_logs()
-            verbose = False if not 'verbose' in migration else migration['verbose']
-            assistant = MigrationAssistant(
-                migration=migration, 
-                verbose=verbose,
-                ) 
-            if 'file_batch_size' in migration:
-                assistant.set_file_batch_size(migration['file_batch_size'])  
-            migration_response = assistant.migrate() 
-            if migration_response: 
-                assistant.notify_completion()   
-            assistant.upload_logs_to_destination()  
-            clear_logs(assistant)

@@ -47,6 +47,7 @@ class MicrosoftSingleSignOnCallbackView(View):
                     username=graph_user_data['userPrincipalName'],
                     first_name=graph_user_data['givenName'],
                     last_name=graph_user_data['surname'],
+                    username=graph_user_data['userPrincipalName'],
                     # irrelevant. user will use SSO.
                     password=get_random_value(length=24)
                 )
