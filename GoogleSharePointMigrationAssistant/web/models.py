@@ -45,6 +45,11 @@ class Migration(models.Model):
             '"shared_drive" or "folder"')
     )
 
+    flattened_google_files_list = models.JSONField(
+        null=True, blank=True, 
+        verbose_name='Flattened list of all Google files included in the migration'
+    )
+
     # FIXME/TODO - USE S3 INSTEAD OF LOCAL FILE SYSTEM
     local_temp_dir = models.CharField(
         max_length=128, null=True, blank=True,
@@ -83,6 +88,7 @@ class Migration(models.Model):
             f'Migrate {self.source_type} {self.source_name} '
             f'to {dest_string}. Migration job is currently {self.state.lower()}'
         )
+    
     
     @property 
     def source_type(self):

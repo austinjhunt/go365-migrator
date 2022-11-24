@@ -560,11 +560,21 @@ class GoogleToSharePoint(BaseLogging):
             self._upload_and_delete() 
         return True
 
-    def migrate(self, entity_type='shared_drive', entity_name=''):
-        if entity_type == 'shared_drive':     
-            response = self._download_shared_drive(entity_name=entity_name) 
-        elif entity_type == 'folder': 
-            response = self._download_folder(entity_name=entity_name)
+    def migrate(self, flattened_google_files_list: list = []):
+        self.info({'migrate': {'status': 'starting'}})
+        response = self._migrate_files_list(
+            flattened_files_list=flattened_google_files_list
+        )
+        self.info({'migrate':{'status': 'complete', 'response': response}})
+        return response 
+    
+    def scan(self):
+        self.info({'scan': {'status': 'starting'}})
+        if self.migration.source_type == 'shared_drive':
+            response = self._scan_shared_drive()
+        elif self.migration.source_type == 'folder':
+            response = self._scan_folder()
+        self.info({'scan': {'status': 'complete', 'response': response}})
         return response 
 
     
