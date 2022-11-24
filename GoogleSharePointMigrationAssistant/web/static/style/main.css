@@ -8,10 +8,6 @@ body {
   scroll-behavior: smooth;
 }
 
-div.page-content {
-  height: 90vh;
-}
-
 html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;

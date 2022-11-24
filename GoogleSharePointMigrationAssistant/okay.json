@@ -1,0 +1,203 @@
+[
+    {
+        "kind": "drive#file",
+        "id": "1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew",
+        "name": "FIE 2021 Ideas.docx",
+        "mimeType": "application/vnd.google-apps.document",
+        "size": "1024",
+        "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=pdf",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1bg7ZVtnWF4RbqdmsrKAdgJse2Mc0XBuphrHkNseq8ew&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1VpYbrUb7Ld_Hlv4_DLwnnMQffjSNJeBn",
+        "name": "API Table and Directions.docx",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "size": "29196",
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk",
+        "name": "Untitled document.docx",
+        "mimeType": "application/vnd.google-apps.document",
+        "size": "1364826",
+        "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=pdf",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1b_6un8ddClL8aRqS86EVkPMJcJvTt2sYPbN9zyQdbKk&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM",
+        "name": "Copy of Confusion Matrix and Metrics.xlsx",
+        "mimeType": "application/vnd.google-apps.spreadsheet",
+        "size": "5464",
+        "exportLinks": {
+            "application/x-vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM&exportFormat=ods",
+            "text/tab-separated-values": "https://docs.google.com/spreadsheets/export?id=1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM&exportFormat=tsv",
+            "application/pdf": "https://docs.google.com/spreadsheets/export?id=1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM&exportFormat=pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "https://docs.google.com/spreadsheets/export?id=1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM&exportFormat=xlsx",
+            "text/csv": "https://docs.google.com/spreadsheets/export?id=1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM&exportFormat=csv",
+            "application/zip": "https://docs.google.com/spreadsheets/export?id=1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM&exportFormat=zip",
+            "application/vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1xCKNPh_NHx-JsQlwId-ZZlzoVqjYD9hVrmuFvzdiDfM&exportFormat=ods"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4",
+        "name": "oauth2 d2l.docx",
+        "mimeType": "application/vnd.google-apps.document",
+        "size": "9604",
+        "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=pdf",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1XjIrKu_F75b4GIdfEeEYh6y6arPR6Tjk_BO8fIrvoY4&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1ZT_CQVKEA3v3QUFAfR6bfhwVHDp-TWsuPNhvwjRC8Nc",
+        "name": "My google drawing.pdf",
+        "mimeType": "application/vnd.google-apps.drawing",
+        "size": "360537",
+        "exportLinks": {
+            "image/svg+xml": "https://docs.google.com/feeds/download/drawings/Export?id=1ZT_CQVKEA3v3QUFAfR6bfhwVHDp-TWsuPNhvwjRC8Nc&exportFormat=svg",
+            "image/png": "https://docs.google.com/feeds/download/drawings/Export?id=1ZT_CQVKEA3v3QUFAfR6bfhwVHDp-TWsuPNhvwjRC8Nc&exportFormat=png",
+            "application/pdf": "https://docs.google.com/feeds/download/drawings/Export?id=1ZT_CQVKEA3v3QUFAfR6bfhwVHDp-TWsuPNhvwjRC8Nc&exportFormat=pdf",
+            "image/jpeg": "https://docs.google.com/feeds/download/drawings/Export?id=1ZT_CQVKEA3v3QUFAfR6bfhwVHDp-TWsuPNhvwjRC8Nc&exportFormat=jpeg"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test2WithGoogleAppFiles"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1WWEEidqK12pWsaqRuqnWAyDgtC5iJHzs",
+        "name": "My Test Colab File.ipynb",
+        "mimeType": "application/vnd.google.colaboratory",
+        "size": "803",
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test2WithGoogleAppFiles"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8",
+        "name": "my data spreadsheet.xlsx",
+        "mimeType": "application/vnd.google-apps.spreadsheet",
+        "size": "1024",
+        "exportLinks": {
+            "application/x-vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8&exportFormat=ods",
+            "text/tab-separated-values": "https://docs.google.com/spreadsheets/export?id=1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8&exportFormat=tsv",
+            "application/pdf": "https://docs.google.com/spreadsheets/export?id=1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8&exportFormat=pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "https://docs.google.com/spreadsheets/export?id=1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8&exportFormat=xlsx",
+            "text/csv": "https://docs.google.com/spreadsheets/export?id=1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8&exportFormat=csv",
+            "application/zip": "https://docs.google.com/spreadsheets/export?id=1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8&exportFormat=zip",
+            "application/vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1LnfNnOtK9psR7UPhgdP3ZYcWtfdBTSvYsGHaeE2i1X8&exportFormat=ods"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test2WithGoogleAppFiles"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1SQdS6a-mZe9zkuJ-ZctnOYssTqCuvmx7Ef9O3fCbhDQ",
+        "name": "My presentation.pptx",
+        "mimeType": "application/vnd.google-apps.presentation",
+        "size": "28702",
+        "exportLinks": {
+            "application/vnd.oasis.opendocument.presentation": "https://docs.google.com/feeds/download/presentations/Export?id=1SQdS6a-mZe9zkuJ-ZctnOYssTqCuvmx7Ef9O3fCbhDQ&exportFormat=odp",
+            "application/pdf": "https://docs.google.com/feeds/download/presentations/Export?id=1SQdS6a-mZe9zkuJ-ZctnOYssTqCuvmx7Ef9O3fCbhDQ&exportFormat=pdf",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation": "https://docs.google.com/feeds/download/presentations/Export?id=1SQdS6a-mZe9zkuJ-ZctnOYssTqCuvmx7Ef9O3fCbhDQ&exportFormat=pptx",
+            "text/plain": "https://docs.google.com/feeds/download/presentations/Export?id=1SQdS6a-mZe9zkuJ-ZctnOYssTqCuvmx7Ef9O3fCbhDQ&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test2WithGoogleAppFiles"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg",
+        "name": "My doc with qualtrics image.docx",
+        "mimeType": "application/vnd.google-apps.document",
+        "size": "68383",
+        "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=pdf",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1qvIUHd2mrHl4sObmveby3FR85uZiVjI_Wr2Nr3zd2Gg&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test2WithGoogleAppFiles"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo",
+        "name": "Contacts.docx",
+        "mimeType": "application/vnd.google-apps.document",
+        "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=pdf",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1Kaz-ObOAIPByOODeQ5pJxix5V8xp_fLNz8nNRXuBvzo&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU",
+        "name": "Untitled document.docx",
+        "mimeType": "application/vnd.google-apps.document",
+        "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=pdf",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1DOcMTJlHhCcD6xereNeGhMiNZiQPfyNp8a5VR0OG1LU&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test"
+    },
+    {
+        "kind": "drive#file",
+        "id": "1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0",
+        "name": "Founding Docs.docx",
+        "mimeType": "application/vnd.google-apps.document",
+        "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=pdf",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1GtBlYT11iIfEjHcJ4N6g3nhz6AztBlYg7V1RcOfvHD0&exportFormat=txt"
+        },
+        "parent_folder_local_path": "/Users/austinhunt/dev/google-o365-migrator/GoogleSharePointMigrationAssistant/web/plumbing/austin353 Migration Folder/Test"
+    }
+]

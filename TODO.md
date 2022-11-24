@@ -14,3 +14,4 @@
 - establish ordered steps flow for setting up migration
 - Use AAD application setting to determine user provisioning from SSO
 - Make "confirm source selections" auto-redirect to next step instead of having to click another "Continue" button
+- Use S3 instead of file system. MVP status currently. 

@@ -9,10 +9,12 @@
     justify-content: center;
   "
 >
-  <div class="w-75 text-center">
+  <div class="w-75 text-left bg-light">
     {% if error %}
     <h1>Error</h1>
-    <p><code>{{error}}</code></p>
+    <div class="rounded p-3 bg-dark text-success">
+      <code>{{error}}</code>
+    </div>
     {% endif %}
   </div>
 </div>

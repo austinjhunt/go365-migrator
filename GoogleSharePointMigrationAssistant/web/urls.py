@@ -45,8 +45,10 @@ urlpatterns = [
     path('use-sharepoint-destination', UseSharePointDestinationView.as_view(), name='use-sharepoint-destination'),
     ## END SHAREPOINT SELECTED
   
-
+    # scan before migrating
+    path('scan-source', ScanSourceDataView.as_view(), name='scan-source'),
+    path('scan-source-report/<slug:migration_id>', ScanSourceReportView.as_view(), name='scan-source-report'),
     
-    # start migration
-    path('start-migration', StartMigrationView.as_view(), name='start-migration')
+    path('start-migration/<slug:migration_id>', StartMigrationView.as_view(), name='start-migration')
+
 ]

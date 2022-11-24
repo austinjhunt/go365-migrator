@@ -1,53 +1,54 @@
 import shutil   
 import time 
-import time  
-from django.http import HttpRequest
+from msal import SerializableTokenCache
+from celery import shared_task
 from .constants import *  
 from .sharepoint import SharePointUploader
-from .googledownloader import GoogleToSharePoint
+from .googletosharepoint import GoogleToSharePoint
 from .onedrive import OneDriveUploader
-from .base import BaseLogging 
+from .base import BaseUtil 
 from .notif.notifier import Notifier
 from ..models import Migration
+from django.contrib.auth.models import User
 
-class MigrationAssistant(BaseLogging):
+class MigrationAssistant(BaseUtil):
     def __init__(
         self,
         verbose: bool = False, 
         migration: Migration = None,
         name: str = 'MigrationAssistant',
-        request: HttpRequest = None
+        google_credentials: dict = {},
+        user: User = None,
+        m365_token_cache: SerializableTokenCache = None
         ): 
         super().__init__(name=name, verbose=verbose)      
         self.migration = migration
-        self.request = request
-        # FIXME: Use S3
+        self.m365_token_cache = m365_token_cache
+        self.google_credentials = google_credentials
+        self.user = user 
         self.local_temp_dir = name.lower().replace(' ', '')
         self.notify_stakeholders = [{
-            "name": f'{self.request.user.first_name} {self.request.user.last_name}', #FIXME - need to populate name with SSO 
-            "email": self.request.user.email #fix me too
+            "name": f'{self.user.first_name} {self.user.last_name}',
+            "email": user.email 
         }]
 
         self.migration_elapsed_time_seconds = 0 
         self.file_batch_size = FILE_BATCH_SIZE   
 
-        if self.migration.target_type == 'sharepoint_folder':   
-            self.target_document_library = migration['target_document_library']
-            self.target_folder = migration['target_folder'] 
+        if self.migration.target_type == 'sharepoint_folder': 
             self.uploader = SharePointUploader(
+                migration=self.migration,
                 local_folder_base_path=self.local_temp_dir,
-                target_sharepoint_site_url=self.migration.target_site_url,
-                target_document_library_name=self.migration.target_document_library_name,
-                target_base_folder=self.migration.target_folder_name, # possible problem
                 use_multithreading=False,
-                verbose=verbose
+                verbose=verbose,
+                m365_token_cache=self.m365_token_cache
             ) 
 
         elif self.migration.target_type == 'onedrive_folder': 
             self.uploader = OneDriveUploader(
                 verbose=verbose, 
                 local_folder_base_path=self.local_temp_dir,
-                username=self.request.user.username
+                username=self.user.username
             )
             
         self.downloader = GoogleToSharePoint(
@@ -56,14 +57,13 @@ class MigrationAssistant(BaseLogging):
             local_temp_dir=self.local_temp_dir,
             file_batch_size=FILE_BATCH_SIZE,
             migration=self.migration,
-            request=self.request 
+            google_credentials=self.google_credentials
             )
 
     def set_file_batch_size(self, fbs):
         self.info(f'Setting downloader file batch size to {fbs}') 
         self.downloader.file_batch_size = fbs 
-               
-    
+            
     def notify_completion(self): 
         self.notifier = Notifier() 
         self.notifier.notify_completion(
@@ -86,10 +86,8 @@ class MigrationAssistant(BaseLogging):
         self.notifier.shutdown_logging() 
         if self.migration.target_type == 'sharepoint_folder':
             self.uploader.configure(
-                local_folder_base_path=LOG_FOLDER_PATH,
-                target_sharepoint_site_url=self.migration.target_site_url, 
-                target_document_library_name=self.migration.target_document_library_name,
-                target_base_folder=f'{self.migration.target_folder_name}/{self.local_temp_dir.split("/")[-1]}',
+                migration=self.migration,
+                local_temp_dir=self.local_temp_dir,
                 use_multithreading=True
             )
             self.uploader.upload(local_folder_base_path=LOG_FOLDER_PATH) 
@@ -102,11 +100,7 @@ class MigrationAssistant(BaseLogging):
 
     def migrate(self):
         start = time.time()
-        # possible source types: file, folder, user_drive, shared_drive
-        response = self.downloader.download(
-            entity_type=self.migration.source_type,
-            entity_name=self.migration.source_name
-        ) 
+        response = self.downloader.migrate()
         if not response: 
             return False 
         self.info(f"{self.downloader.num_files_downloaded} total files downloaded.\n")
@@ -117,18 +111,42 @@ class MigrationAssistant(BaseLogging):
         self.migration_elapsed_time_seconds = self.format_elapsed_time_seconds(elapsed)
         return True 
 
-    def scan_source(self):
-        return self.downloader.
+    def scan_data_source(self):
+        return self.downloader.scan()
 
-def clear_logs(assistant: MigrationAssistant = None):
-    print('Clearing logs')
-    if assistant:
-        assistant.shutdown_logging()
-        assistant.uploader.shutdown_logging()
-        assistant.downloader.shutdown_logging() 
-    try:
-        shutil.rmtree(LOG_FOLDER_PATH, ignore_errors=True)
-    except Exception as e:
-        print(f'Failed to remove log directory {LOG_FOLDER_PATH}')
-        print(e)
-    time.sleep(1)
+@shared_task
+def scan_data_source(migration_id: int = 0, google_credentials: dict = {}, user_id: int = 0):
+    """ Scan source data asynchronously """
+    user = User.objects.get(id=user_id)
+    migration = Migration.objects.get(id=migration_id)
+    assistant = MigrationAssistant(
+            migration=migration, 
+            name=f'Scan-{user.username}', 
+            google_credentials=google_credentials,
+            user=user
+            )
+    return assistant.scan_data_source()
+
+@shared_task 
+def migrate_data(migration_id: int = 0, google_credentials: dict = {}, user_id: int = 0):
+    user = User.objects.get(id=user_id)
+    migration = Migration.objects.get(id=migration_id)
+    assistant = MigrationAssistant(
+        migration=migration,
+        name=f'Migration-{user.username}',
+        google_credentials=google_credentials,
+        user=user 
+    )
+    return assistant.migrate()
+# def clear_logs(assistant: MigrationAssistant = None):
+#     print('Clearing logs')
+#     if assistant:
+#         assistant.shutdown_logging()
+#         assistant.uploader.shutdown_logging()
+#         assistant.downloader.shutdown_logging() 
+#     try:
+#         shutil.rmtree(LOG_FOLDER_PATH, ignore_errors=True)
+#     except Exception as e:
+#         print(f'Failed to remove log directory {LOG_FOLDER_PATH}')
+#         print(e)
+#     time.sleep(1)

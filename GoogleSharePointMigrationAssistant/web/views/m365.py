@@ -1,7 +1,7 @@
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login
-from .util import (
+from ..plumbing.m365_util import (
     get_random_value, get_sign_in_flow,
     get_user_profile, get_token_from_code
 )
@@ -9,7 +9,6 @@ from django.shortcuts import render, redirect
 from django.views.generic import View
 import logging
 logger = logging.getLogger(__name__)
-
 
 class MicrosoftSingleSignOnView(View):
     def get(self, request):
@@ -47,7 +46,7 @@ class MicrosoftSingleSignOnCallbackView(View):
                     username=graph_user_data['userPrincipalName'],
                     first_name=graph_user_data['givenName'],
                     last_name=graph_user_data['surname'],
-                    username=graph_user_data['userPrincipalName'],
+                    email=graph_user_data['userPrincipalName'],
                     # irrelevant. user will use SSO.
                     password=get_random_value(length=24)
                 )

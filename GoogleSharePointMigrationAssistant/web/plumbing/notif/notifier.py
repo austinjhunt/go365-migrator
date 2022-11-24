@@ -5,12 +5,12 @@ from email.mime.text import MIMEText
 from string import Template
 from urllib.parse import quote
 import ssl  
-from ..base import BaseLogging
+from ..base import BaseUtil
 from ..constants import (
     SMTP_USERNAME, SMTP_PASSWORD, SMTP_PORT, SMTP_SERVER 
 ) 
 
-class Notifier(BaseLogging): 
+class Notifier(BaseUtil): 
     def __init__(self, name: str = 'Notifier'):
         super().__init__(
             name=name, 

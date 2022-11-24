@@ -44,10 +44,13 @@ class Migration(models.Model):
             'or shared drive being migrated. Type can be '
             '"shared_drive" or "folder"')
     )
-
-    flattened_google_files_list = models.JSONField(
+    source_data_scan_result = models.JSONField(
         null=True, blank=True, 
-        verbose_name='Flattened list of all Google files included in the migration'
+        verbose_name=(
+            'High-level stats about the migration '
+            'to be run based on scanning the source '
+            'data to be migrated'
+        )
     )
 
     # FIXME/TODO - USE S3 INSTEAD OF LOCAL FILE SYSTEM

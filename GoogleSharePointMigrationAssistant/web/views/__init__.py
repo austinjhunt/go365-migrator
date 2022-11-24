@@ -15,3 +15,4 @@ from .migrations import (
 )
 from .setup import SetupView
 from .google import InitializeGoogleOAuthView, GoogleOAuthRedirectUri
+from .scan import ScanSourceDataView,ScanSourceReportView

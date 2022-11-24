@@ -1,0 +1,36 @@
+[SPUploader - sharepoint.py:64 - setup_session() ] Setting up authenticated SharePoint session
+[SPUploader - sharepoint.py:73 - setup_session() ] session ready
+[SPUploader - sharepoint.py:64 - setup_session() ] Setting up authenticated SharePoint session
+[SPUploader - sharepoint.py:73 - setup_session() ] session ready
+[SPUploader - sharepoint.py:64 - setup_session() ] Setting up authenticated SharePoint session
+[SPUploader - sharepoint.py:73 - setup_session() ] session ready
+[SPUploader - sharepoint.py:64 - setup_session() ] Setting up authenticated SharePoint session
+[SPUploader - sharepoint.py:73 - setup_session() ] session ready
+[SPUploader - sharepoint.py:64 - setup_session() ] Setting up authenticated SharePoint session
+[SPUploader - sharepoint.py:73 - setup_session() ] session ready
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: migration-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: scan-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: scan-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:130 - child_exists() ] Checking if child already exists: scan-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:150 - child_exists() ] 'SharePointUploader' object has no attribute 'graph_api_base'
+Failed to check if child exists: scan-huntaj@cofc.edu in folder root
+[SPUploader - sharepoint.py:310 - upload() ] All enqueued upload tasks complete. Upload finished.
+[SPUploader - sharepoint.py:310 - upload() ] All enqueued upload tasks complete. Upload finished.

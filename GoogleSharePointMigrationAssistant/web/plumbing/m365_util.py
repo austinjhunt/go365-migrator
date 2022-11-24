@@ -2,6 +2,7 @@
 from msal import ConfidentialClientApplication, SerializableTokenCache
 from django.core.cache import cache as django_cache
 from django.conf import settings
+from django.http import HttpRequest
 from django.shortcuts import redirect
 import requests
 import random
@@ -43,7 +44,7 @@ def get_sign_in_flow():
     auth_app = get_msal_app()
     return auth_app.initiate_auth_code_flow(
         scopes=settings.AAD_CLIENT_SCOPES,  # for just signing in
-        redirect_uri='http://localhost:8000/m365-redirect-uri',
+        redirect_uri='http://localhost:8000/m365-redirect-uri', #FIXME - do not hardcode
     )
 
 
@@ -74,7 +75,9 @@ def get_token_from_code(request):
     return result
 
 
-def get_token_from_cache(request):
+def get_token_from_request_session(request: HttpRequest):
+    """ Given a request object, obtain a token cache using its .session attribute, 
+    then re-save that cache in the session """
     result = None
     config = django_cache.get(
         'config', AdministrationSettings.objects.first())
@@ -89,8 +92,20 @@ def get_token_from_cache(request):
     return result
 
 
+
+
+def get_token_from_cache(cache: SerializableTokenCache = None):
+    """ given a serializable token cache, get the MSAL app from it """
+    auth_app = get_msal_app(cache)
+    accounts = auth_app.get_accounts()
+    if accounts:
+        result = auth_app.acquire_token_silent(
+            settings.AAD_CLIENT_SCOPES, account=accounts[0])
+    return result
+
+
 def get_user_profile(request):
-    result = get_token_from_cache(request)
+    result = get_token_from_request_session(request)
     if not result:
         redirect('init-m365-auth')
     response = requests.get(
@@ -112,7 +127,7 @@ def get_user_profile(request):
 
 def get_user_onedrive_item_by_id(request, item_id):
     if f'user_onedrive_folder_{item_id}' not in request.session:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/me/drive/items/{item_id}',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -136,7 +151,7 @@ def get_user_onedrive_item_by_id(request, item_id):
 
 def get_user_onedrive_root_children(request):
     if 'user_onedrive_root_children' not in request.session:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/me/drive/root/children',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -164,7 +179,7 @@ def get_user_onedrive_root_children(request):
 def get_user_sharepoint_sites(request, site_filter=''):
     """ Allow user to search for sharepoint site. If no site_filter provided, pulls last query result from session.  """
     if 'sharepoint_sites' not in request.session or site_filter:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/sites?$search={site_filter}',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -191,7 +206,7 @@ def get_user_sharepoint_sites(request, site_filter=''):
 def get_sharepoint_site_by_id(request, site_id):
     """ Allow user to search for sharepoint site. If no site_filter provided, pulls last query result from session.  """
     if f'sharepoint_site_{site_id}' not in request.session:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/sites/{site_id}',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -215,7 +230,7 @@ def get_sharepoint_site_by_id(request, site_id):
 
 def get_sharepoint_doclib_by_id(request, doclib_id):
     if f'sharepoint_doclib_{doclib_id}' not in request.session:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/drives/{doclib_id}',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -239,7 +254,7 @@ def get_sharepoint_doclib_by_id(request, doclib_id):
 
 def get_sharepoint_doclib_item_by_id(request, doclib_id, item_id):
     if f'sharepoint_doclib_{doclib_id}_item_{item_id}' not in request.session:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/drives/{doclib_id}/items/{item_id}',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -266,7 +281,7 @@ def get_sharepoint_doclib_item_by_id(request, doclib_id, item_id):
 def get_sharepoint_doclib_children_by_id(request, doclib_id):
     """ return children in root folder """
     if f'sharepoint_doclib_{doclib_id}_children' not in request.session:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/drives/{doclib_id}/root/children',
             headers={'Authorization': f'Bearer {result["access_token"]}'},
@@ -293,7 +308,7 @@ def get_sharepoint_doclib_children_by_id(request, doclib_id):
 def get_sharepoint_site_document_libraries(request, site_id=None):
     """ Get document libraries for a site. If no site_id provided, use stored libraries in session. """
     if 'sharepoint_document_libraries' not in request.session or site_id:
-        result = get_token_from_cache(request)
+        result = get_token_from_request_session(request)
         response = requests.get(
             url=f'{settings.GRAPH_API_URL}/sites/{site_id}/drives',
             headers={'Authorization': f'Bearer {result["access_token"]}'},

@@ -3,12 +3,26 @@ import os
 from .constants import LOG_FOLDER_PATH
 from datetime import timedelta
 from pathlib import PurePath
+import math 
 
-class BaseLogging: 
+class BaseUtil: 
     def __init__(self, name: str = '', verbose: bool = False): 
         self.name = name
         self.verbose = verbose 
         self.setup_logging() 
+
+    
+    def convert_size(self, size_bytes):
+        """ Convert size in bytes to size in friendly format. """
+        if isinstance(size_bytes, str): 
+            size_bytes = int(size_bytes)
+        if size_bytes == 0:
+            return "0B"
+        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+        i = int(math.floor(math.log(size_bytes, 1024)))
+        p = math.pow(1024, i)
+        s = round(size_bytes / p, 2)
+        return "%s %s" % (s, size_name[i])
     
     def setup_logging(self):
         """ set up self.logger for Driver logging """ 

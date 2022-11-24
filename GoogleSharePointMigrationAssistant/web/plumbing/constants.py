@@ -3,7 +3,7 @@ import os
 import json 
 from dotenv import load_dotenv
 load_dotenv()
-
+GRAPH_API_BASE = 'https://graph.microsoft.com/v1.0'
 try:
     LOG_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'migration-logs')
     DEFAULT_PAGESIZE = 1000 

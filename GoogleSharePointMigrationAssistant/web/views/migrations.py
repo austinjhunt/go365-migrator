@@ -6,14 +6,14 @@ from django.shortcuts import render, redirect
 import logging
 from ..models import Migration
 from ..forms import SharePointSiteSearchForm
-from .util import (
+from ..plumbing.m365_util import (
     get_user_onedrive_root_children, get_user_sharepoint_sites,
     get_sharepoint_site_document_libraries, get_sharepoint_site_by_id,
     get_sharepoint_doclib_by_id, get_sharepoint_doclib_children_by_id,
-    get_sharepoint_doclib_item_by_id, get_user_onedrive_item_by_id
+    get_sharepoint_doclib_item_by_id, get_user_onedrive_item_by_id, 
+    load_cache, 
 )
-from ..plumbing.migrationassistant import MigrationAssistant
-
+from ..plumbing.migrationassistant import migrate_data
 logger = logging.getLogger(__name__)
 
 
@@ -29,54 +29,22 @@ class ListMigrationsView(View, LoginRequiredMixin):
 
 
 class StartMigrationView(View, LoginRequiredMixin):
-    def get(self, request):
-        
-        # clear_logs()
-        # verbose = False if not 'verbose' in migration else migration['verbose']
-        # assistant = Google2SharePointAssistant(
-        #     migration=migration, 
-        #     verbose=verbose,
-        #     google_auth_method='svc_account',
-        #     ) 
-        # if 'file_batch_size' in migration:
-        #     assistant.set_file_batch_size(migration['file_batch_size'])  
-        # migration_response = assistant.migrate() 
-        # if migration_response: 
-        #     assistant.notify_completion()   
-        # assistant.upload_logs_to_destination()  
-        # clear_logs(assistant)
-        migration_source = request.session.get('source_selected')
-        migration_source_type = migration_source['source_type']
-        del migration_source['source_type']
-        print('migration source')
-        print(migration_source)
-        migration_destination = request.session.get('destination_selected')
-        migration_destination_details = list(migration_destination.values())[0]
-        migration_destination_type = list(migration_destination.keys())[0]
-        migration = Migration(
-            user = request.user, 
-            google_source = {
-                'type': migration_source_type,
-                'details': migration_source
-            },
-            local_temp_dir = request.user.username,
-            target = {
-                'type': migration_destination_type,
-                'details': migration_destination_details
-            }
-        )
-        migration.save()
-        assistant = MigrationAssistant(
-            migration=migration, 
-            name=f'Migration-{request.user.username}', 
-            request=request
+    def get(self, request, migration_id):
+        migration = Migration.objects.get(id=migration_id)
+        if migration.user == request.user:
+            migrate_data.delay(
+                migration_id=migration.id, 
+                google_credentials=request.session.get('google_credentials'), 
+                user_id=request.user.id
             )
-        migration_response = assistant.migrate()
-        if migration_response:
-            assistant.notify_completion()
-        assistant.scan()
-
-        return redirect('list-migrations')
+            return redirect('list-migrations')
+        else: 
+            return render(
+                request=request,
+                template_name='error.html',
+                context={'error': 'You are not authorized perform this operation'}
+            )
+        
 
 
 class UseGoogleDriveFolderSourceView(View, LoginRequiredMixin):

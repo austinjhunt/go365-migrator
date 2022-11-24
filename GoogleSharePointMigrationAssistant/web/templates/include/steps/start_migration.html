@@ -1,6 +1,6 @@
 <div class="text-center h-100 position-relative">
   <p class="lead">
-    Click the link below to start migrating your data from
+    Click the link below to run an initial scan of your data before migrating from 
     <strong>{{source_selected.name}} ({{source_selected.source_type}})</strong> in Google Drive 
     to {% if destination_selected.sharepoint_folder %} the
     <strong>{{destination_selected.sharepoint_folder.folder.name}}</strong> folder in
@@ -18,16 +18,18 @@
       ></a>. 
     {% elif destination_selected.onedrive_folder %}
     the <strong>{{destination_selected.onedrive_folder.name}}</strong> folder in your OneDrive. {% endif %}
-    It will first be queued if there are other migration jobs already running.
+
+    The scan will provide information about potential data than cannot be migrated 
+    due to incompatibility with the target environment. 
   </p>
   <a
-    href="{% url 'start-migration' %}"
-    title="Start your data migration"
+    href="{% url 'scan-source' %}"
+    title="Prepare your data migration"
     class="btn btn-lg btn-primary"
   >
-    Start Migration
+   Scan
   </a>
-  <div class="position-absolute bottom-0 left-0 mb-0 text-start">
+  <div class="position-relative bottom-0 mt-4 start-0 mb-0 text-start">
     <a
       href="{% url 'change-destination' %}"
       title="Change the migration destination"

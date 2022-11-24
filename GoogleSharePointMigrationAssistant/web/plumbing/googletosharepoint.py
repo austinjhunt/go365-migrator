@@ -13,7 +13,7 @@ import time
 import shutil 
 import os
 from ..models import AdministrationSettings, Migration
-from .base import BaseLogging
+from .base import BaseUtil
 from .constants import (
     GOOGLE_DRIVE_SLEEP_RETRY_SECONDS, 
     MAX_GOOGLE_DRIVE_QUERIES_PER_ONE_HUNDRED_SECONDS,
@@ -21,7 +21,7 @@ from .constants import (
     MAX_LIST_THREADS
 )
 
-class GoogleToSharePoint(BaseLogging):
+class GoogleToSharePoint(BaseUtil):
     def __init__(self, 
     verbose: bool = False, 
     uploader = None , # sharepoint uploader or onedrive uploader  
@@ -30,7 +30,7 @@ class GoogleToSharePoint(BaseLogging):
     name: str = 'GoogleDownloader',
     auth_method: str = 'svc_account', # alternative is 'oauth',
     migration: Migration = None, 
-    request: HttpRequest = None,
+    google_credentials: dict = {},
     ): 
         super().__init__(name=name, verbose=verbose)
         self.admin_config = AdministrationSettings.objects.first()
@@ -39,7 +39,8 @@ class GoogleToSharePoint(BaseLogging):
         self.scopes = ['https://www.googleapis.com/auth/drive.readonly'] 
         self.folder_type = 'application/vnd.google-apps.folder'  
         self.uploader = uploader
-        self.request = request
+        self.google_credentials = google_credentials
+        self.unmigratable_files = []
         # init 
         self.num_files_already_in_destination = 0
         self.local_temp_dir = os.path.join(os.path.dirname(__file__), local_temp_dir)
@@ -50,7 +51,7 @@ class GoogleToSharePoint(BaseLogging):
         self.num_files_skipped = 0 
         self.num_files_downloaded = 0 
         self.num_files_failed_to_download = 0 
-        self.total_drive_files = 0 
+        self.total_migratable_files = 0 
         self.num_active_downloads = 0
         self.setup_service(auth_method=auth_method) 
         self.info({
@@ -59,8 +60,8 @@ class GoogleToSharePoint(BaseLogging):
  
 
     def _get_google_credentials_from_session(self):
-        """ Alternative to service account credentials. Use self.request to pull google creds from session. """
-        return CredentialsOauth(**self.request.session.get('google_credentials'))
+        """ Alternative to service account credentials. Pull google creds from Oauth session (passed as arg to this class instance) """
+        return CredentialsOauth(**self.google_credentials)
     
     def _get_google_credentials_from_svc_account_config(self):
         """ Alternative to Oauth session. Use Service account configuration for creating connection."""
@@ -99,11 +100,7 @@ class GoogleToSharePoint(BaseLogging):
             'application/vnd.google-apps.form',
             'application/vnd.google-apps.shortcut'
         ]
-        migratable = True 
-        for mt in non_migratable_mimetypes: 
-            if file['mimeType'] == mt: 
-                migratable = False 
-        return migratable 
+        return not (file['mimeType'] in non_migratable_mimetypes)
 
     def file_too_large_for_export(self, file): 
         """ return true if file too large for export. 10MB appears to be limit.
@@ -119,18 +116,6 @@ class GoogleToSharePoint(BaseLogging):
         else:
             return True
 
-    def convert_size(self, size_bytes):
-        """ Convert size in bytes to size in friendly format. """
-        if isinstance(size_bytes, str): 
-            size_bytes = int(size_bytes)
-        
-        if size_bytes == 0:
-            return "0B"
-        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-        i = int(math.floor(math.log(size_bytes, 1024)))
-        p = math.pow(1024, i)
-        s = round(size_bytes / p, 2)
-        return "%s %s" % (s, size_name[i])
 
     def set_file_batch_size(self, fbs):
         """ Set the file batch size. I.e., how many files to download per batch. 
@@ -256,7 +241,7 @@ class GoogleToSharePoint(BaseLogging):
         while self.num_active_downloads > 0: 
             self.debug({'_upload_and_delete': f"Waiting for ({self.num_active_downloads}) active download threads to finish"})
             time.sleep(3) 
-        self.uploader.set_todo_count(total_files_to_upload=self.total_drive_files)
+        self.uploader.set_todo_count(total_files_to_upload=self.total_migratable_files)
         self.uploader.upload(local_folder_base_path=self.local_temp_dir)
         try: 
             shutil.rmtree(self.local_temp_dir)
@@ -272,7 +257,7 @@ class GoogleToSharePoint(BaseLogging):
             file_name = sanitize(file_name)
             os.makedirs(dest_folder, exist_ok=True)
             filepath = os.path.join(dest_folder, file_name)
-            self.info({'_download_worker': f"Downloading file {file_name} ({self.num_files_downloaded + 1}/{self.total_drive_files})"})   
+            self.info({'_download_worker': f"Downloading file {file_name} ({self.num_files_downloaded + 1}/{self.total_migratable_files})"})   
             with open(filepath, "wb") as wer:
                 if not too_large:
                     # request is normal HttpRequest
@@ -360,14 +345,19 @@ class GoogleToSharePoint(BaseLogging):
             for future in wait(futures).done:
                 folder_counts.append(future.result())
         assert len(folder_counts) == len(folders)
-        migratable_file_count = len([f for f in files if self.file_is_migratable(f)]) + sum(folder_counts)  
+        migratable_file_count = sum(folder_counts)
+        for f in files:
+            if self.file_is_migratable(f):
+                migratable_file_count += 1
+            else:
+                self.unmigratable_files.append(f)
         return migratable_file_count 
         
     def get_progress(self): 
         """ let progress indicate number of successful downloads out of total drive files.
         rather than including failures as progress. that is, could finish at 89% if 11% failed. 
         """
-        r = (self.num_files_downloaded ) / self.total_drive_files
+        r = (self.num_files_downloaded ) / self.total_migratable_files
         return f'{round(r,2) * 100}%'   
 
     def _get_batch_for_download_from_files_list(self, files_list: list = []):   
@@ -439,10 +429,12 @@ class GoogleToSharePoint(BaseLogging):
             **kwargs)['files']  
         for chfi in children_files:
             if self.file_is_migratable(chfi):
-                self.total_drive_files += 1
+                self.total_migratable_files += 1
                 chfi['parent_folder_local_path'] = new_parent_folder_local_path
                 chfi['name'] = f'{chfi["name"]}{self.get_o365_extension_from_file_mimetype(chfi["mimeType"])}'                   
                 files_list.append(chfi)   
+            else:
+                self.unmigratable_files.append(chfi)
         children_folders = self.getlist(
             entity='files', 
             query=f"'{folder_id}' in parents and trashed = false and mimeType = '{self.folder_type}'",
@@ -471,10 +463,12 @@ class GoogleToSharePoint(BaseLogging):
             )      
         for f in files:
             if self.file_is_migratable(f) and not self._file_already_migrated(f):
-                self.total_drive_files += 1
+                self.total_migratable_files += 1
                 f['parent_folder_local_path'] =  self.local_temp_dir
                 f['name'] = f'{f["name"]}{self.get_o365_extension_from_file_mimetype(f["mimeType"])}' 
                 files_list.append(f)  
+            else:
+                self.unmigratable_files.append(f)
         with ThreadPoolExecutor(max_workers=MAX_LIST_THREADS) as executor: 
             futures = [
                 executor.submit(self._get_flattened_files_list_in_folder, f) for f in folders]   
@@ -560,21 +554,42 @@ class GoogleToSharePoint(BaseLogging):
             self._upload_and_delete() 
         return True
 
-    def migrate(self, flattened_google_files_list: list = []):
+    def migrate(self):
+        """ Must be called after scan has run. Scan populates self.migration.source_data_scan_result """
         self.info({'migrate': {'status': 'starting'}})
+        migrate_files = self.migration.source_data_scan_result['migratable_files_list']
+        self.total_migratable_files = len(migrate_files)
         response = self._migrate_files_list(
-            flattened_files_list=flattened_google_files_list
+            flattened_files_list=migrate_files
         )
         self.info({'migrate':{'status': 'complete', 'response': response}})
         return response 
     
+    def _get_total_file_size_from_files_list(self, files_list):
+        size = 0
+        for f in files_list:
+            if 'size' in f:
+                size += int(f['size'])
+        return self.convert_size(size)
+
+
     def scan(self):
         self.info({'scan': {'status': 'starting'}})
         if self.migration.source_type == 'shared_drive':
-            response = self._scan_shared_drive()
+            files_list = self._scan_shared_drive()
         elif self.migration.source_type == 'folder':
-            response = self._scan_folder()
-        self.info({'scan': {'status': 'complete', 'response': response}})
-        return response 
+            files_list = self._scan_folder()
+        scan_response = {
+            'migratable_files_list': files_list,
+            'total_migratable_size': self._get_total_file_size_from_files_list(files_list),
+            'total_migratable_count': len(files_list),
+            'unmigratable_files_list': self.unmigratable_files,
+            'total_unmigratable_size': self._get_total_file_size_from_files_list(self.unmigratable_files),
+            'total_unmigratable_count': len(self.unmigratable_files)
+        }
+        self.migration.source_data_scan_result =  scan_response
+        self.migration.save()
+        self.info({'scan': {'status': 'complete', 'response': scan_response}})
+        return scan_response 
 
     

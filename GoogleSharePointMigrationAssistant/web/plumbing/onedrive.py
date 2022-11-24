@@ -7,16 +7,15 @@ import json
 from urllib3.exceptions import ProtocolError
 from concurrent.futures import wait, ThreadPoolExecutor 
 from sanitize_filename import sanitize  
-
 from .constants import (
     ONEDRIVE_APP_CLIENT_ID, ONEDRIVE_APP_CLIENT_SECRET, 
     ONEDRIVE_APP_TENANT_ID, MAX_UPLOAD_THREADS, 
     MAX_GRAPH_REQUESTS_PER_MINUTE, ONE_MINUTE,
-    GRAPH_SLEEP_RETRY_SECONDS 
+    GRAPH_SLEEP_RETRY_SECONDS, GRAPH_API_BASE
 )
-from .base import BaseLogging
+from .base import BaseUtil
 
-class OneDriveUploader(BaseLogging):
+class OneDriveUploader(BaseUtil):
     def __init__(self, 
         name: str = 'OneDriveUploader', 
         local_folder_base_path: str = '',
@@ -31,7 +30,7 @@ class OneDriveUploader(BaseLogging):
         self._num_active_uploads = 0     
         self.base_folder_id = None # updated when uploading base folder 
         self.session = requests.Session()
-        self.graph_api_base = 'https://graph.microsoft.com/v1.0'
+       
         self.scopes = [
             "https://graph.microsoft.com/.default", 
             "offline_access"
@@ -77,9 +76,9 @@ class OneDriveUploader(BaseLogging):
     def create_folder(self, folder_name: str = '', parent_folder_id: str = ''):
         self.info(f'Creating folder {folder_name} in parent folder {parent_folder_id}')
         if parent_folder_id == 'root': 
-            url = f'{self.graph_api_base}/users/{self.username}/drive/root/children'
+            url = f'{GRAPH_API_BASE}/users/{self.username}/drive/root/children'
         else:
-            url = f'{self.graph_api_base}/users/{self.username}/drive/items/{parent_folder_id}/children' 
+            url = f'{GRAPH_API_BASE}/users/{self.username}/drive/items/{parent_folder_id}/children' 
         payload = {
             'name': folder_name,
             'folder': {}, 
@@ -193,7 +192,7 @@ class OneDriveUploader(BaseLogging):
  
     def create_upload_session(self, folder_id: str = '', file_name: str = ''):
         self.info(f'Creating upload session: (file={file_name},folder={folder_id})')
-        url = f'{self.graph_api_base}/users/{self.username}/drive/items/{folder_id}:/{file_name}:/createUploadSession'
+        url = f'{GRAPH_API_BASE}/users/{self.username}/drive/items/{folder_id}:/{file_name}:/createUploadSession'
         payload = {
             "item": { 
                 "@microsoft.graph.conflictBehavior": "rename",
@@ -252,7 +251,7 @@ class OneDriveUploader(BaseLogging):
 
     def _upload_complete_file(self, file_path: str = '', file_name: str = '', remote_parent_folder_id: str = '', total_file_size: int = 0): 
         self.info(f'Uploading complete file: {file_name}')
-        url = f'{self.graph_api_base}/users/{self.username}/drive/items/{remote_parent_folder_id}:/{file_name}:/content'
+        url = f'{GRAPH_API_BASE}/users/{self.username}/drive/items/{remote_parent_folder_id}:/{file_name}:/content'
         self.session.headers.update({'Content-Type': 'multipart/form-data', 'Content-Length': f'{total_file_size}'})  
         with open(file_path, 'rb') as f:
             content = f.read() 
@@ -321,9 +320,9 @@ class OneDriveUploader(BaseLogging):
         child = None
         try:
             if parent_folder_id == 'root': 
-                url = f'{self.graph_api_base}/users/{self.username}/drive/root/children'
+                url = f'{GRAPH_API_BASE}/users/{self.username}/drive/root/children'
             else:
-                url = f'{self.graph_api_base}/users/{self.username}/drive/items/{parent_folder_id}/children' 
+                url = f'{GRAPH_API_BASE}/users/{self.username}/drive/items/{parent_folder_id}/children' 
             url = f"{url}?$filter=name eq '{child_name}'" 
             self.session.headers.update({'Content-Type': 'application/json'})
             response = self.graph_get(url).json() 
@@ -376,9 +375,9 @@ class OneDriveUploader(BaseLogging):
         
     def get_children_from_folder_id(self, folder_id: str = ''): 
         if not folder_id:
-            url = f'{self.graph_api_base}/users/{self.username}/drive/root/children'
+            url = f'{GRAPH_API_BASE}/users/{self.username}/drive/root/children'
         else:
-            url = f'{self.graph_api_base}/users/{self.username}/drive/items/{folder_id}/children' 
+            url = f'{GRAPH_API_BASE}/users/{self.username}/drive/items/{folder_id}/children' 
         response = self.graph_get(url).json() 
         if 'value' in response:
             return response['value']

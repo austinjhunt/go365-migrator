@@ -79,9 +79,13 @@ WSGI_APPLICATION = "GoogleSharePointMigrationAssistant.wsgi.application"
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379',
+        'LOCATION': 'redis://localhost:6379',
     }
 }
+
+# Asynchronous task management with Celery 
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
