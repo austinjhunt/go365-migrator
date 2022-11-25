@@ -11,7 +11,11 @@ class BaseUtil:
         self.verbose = verbose 
         self.setup_logging() 
 
-    
+    def less_than_4mb(self, bytes_size: int = 0): 
+        bytes_in_4mb = 1024 * 1024 * 4
+        res =  bytes_size < bytes_in_4mb 
+        return res 
+        
     def convert_size(self, size_bytes):
         """ Convert size in bytes to size in friendly format. """
         if isinstance(size_bytes, str): 

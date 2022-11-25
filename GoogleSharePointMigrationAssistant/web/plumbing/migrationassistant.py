@@ -1,6 +1,4 @@
-import shutil   
 import time 
-from msal import SerializableTokenCache
 from celery import shared_task
 from .constants import *  
 from .sharepoint import SharePointUploader
@@ -19,7 +17,7 @@ class MigrationAssistant(BaseUtil):
         name: str = 'MigrationAssistant',
         google_credentials: dict = {},
         user: User = None,
-        m365_token_cache: SerializableTokenCache = None
+        m365_token_cache: dict = {}
         ): 
         super().__init__(name=name, verbose=verbose)      
         self.migration = migration
@@ -38,7 +36,6 @@ class MigrationAssistant(BaseUtil):
         if self.migration.target_type == 'sharepoint_folder': 
             self.uploader = SharePointUploader(
                 migration=self.migration,
-                local_folder_base_path=self.local_temp_dir,
                 use_multithreading=False,
                 verbose=verbose,
                 m365_token_cache=self.m365_token_cache
@@ -48,6 +45,7 @@ class MigrationAssistant(BaseUtil):
             self.uploader = OneDriveUploader(
                 verbose=verbose, 
                 local_folder_base_path=self.local_temp_dir,
+                m365_token_cache=self.m365_token_cache,
                 username=self.user.username
             )
             
@@ -73,7 +71,6 @@ class MigrationAssistant(BaseUtil):
             num_files_skipped=self.downloader.num_files_skipped,
             total_drive_files=self.downloader.total_drive_files, 
             elapsed_time=self.migration_elapsed_time_seconds) 
-
 
     def upload_logs_to_destination(self):
         """ 
@@ -109,6 +106,7 @@ class MigrationAssistant(BaseUtil):
         end = time.time()
         elapsed = end - start
         self.migration_elapsed_time_seconds = self.format_elapsed_time_seconds(elapsed)
+        # add migration report to migration object; model update
         return True 
 
     def scan_data_source(self):
@@ -121,21 +119,22 @@ def scan_data_source(migration_id: int = 0, google_credentials: dict = {}, user_
     migration = Migration.objects.get(id=migration_id)
     assistant = MigrationAssistant(
             migration=migration, 
-            name=f'Scan-{user.username}', 
+            name=f'migration-{user.username}', 
             google_credentials=google_credentials,
             user=user
             )
     return assistant.scan_data_source()
 
 @shared_task 
-def migrate_data(migration_id: int = 0, google_credentials: dict = {}, user_id: int = 0):
+def migrate_data(migration_id: int = 0, google_credentials: dict = {}, user_id: int = 0, m365_token_cache: dict = {}):
     user = User.objects.get(id=user_id)
     migration = Migration.objects.get(id=migration_id)
     assistant = MigrationAssistant(
         migration=migration,
         name=f'Migration-{user.username}',
         google_credentials=google_credentials,
-        user=user 
+        user=user,
+        m365_token_cache=m365_token_cache
     )
     return assistant.migrate()
 # def clear_logs(assistant: MigrationAssistant = None):

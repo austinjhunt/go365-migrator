@@ -44,7 +44,8 @@ class GoogleToSharePoint(BaseUtil):
         # init 
         self.num_files_already_in_destination = 0
         self.local_temp_dir = os.path.join(os.path.dirname(__file__), local_temp_dir)
-        self.info(f'self.local_temp_dir={self.local_temp_dir}')
+        self.info({'local_temp_dir': local_temp_dir})
+        self.info({'self.local_temp_dir': self.local_temp_dir})
         self.num_active_downloads = 0 
         self.uploader_running = False 
         self.current_batch_downloaded = 0 
@@ -471,7 +472,7 @@ class GoogleToSharePoint(BaseUtil):
                 self.unmigratable_files.append(f)
         with ThreadPoolExecutor(max_workers=MAX_LIST_THREADS) as executor: 
             futures = [
-                executor.submit(self._get_flattened_files_list_in_folder, f) for f in folders]   
+                executor.submit(self._get_flattened_files_list_in_folder, f, self.local_temp_dir) for f in folders]   
             for future in wait(futures, return_when=ALL_COMPLETED).done: 
                 files_list.extend(future.result()) # extend for one long flat list of files.
         return files_list   
@@ -528,7 +529,7 @@ class GoogleToSharePoint(BaseUtil):
         self.info({'_scan_folder': self.migration.source_id})
         google_files_list = self._get_flattened_files_list_in_folder(
             folder=self.migration.google_source['details'],
-            parent_folder_local_path=os.path.dirname(self.local_temp_dir)
+            parent_folder_local_path=self.local_temp_dir
             )
         google_files_list = self._exclude_files_already_migrated_from_source_file_list(
             google_files_list
@@ -562,6 +563,8 @@ class GoogleToSharePoint(BaseUtil):
         response = self._migrate_files_list(
             flattened_files_list=migrate_files
         )
+        self.migration.state = Migration.STATES.COMPLETE
+        self.migration.save()
         self.info({'migrate':{'status': 'complete', 'response': response}})
         return response 
     

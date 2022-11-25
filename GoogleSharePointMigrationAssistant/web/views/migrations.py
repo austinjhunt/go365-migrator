@@ -35,7 +35,8 @@ class StartMigrationView(View, LoginRequiredMixin):
             migrate_data.delay(
                 migration_id=migration.id, 
                 google_credentials=request.session.get('google_credentials'), 
-                user_id=request.user.id
+                user_id=request.user.id, 
+                m365_token_cache=request.session.get('m365_token_cache')
             )
             return redirect('list-migrations')
         else: 

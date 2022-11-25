@@ -9,6 +9,7 @@
       <div class="card-body">
         <div class="col-sm-12 login-form text-dark">
           <div class="col-lg-12 login-form text-center">
+            {% if not require_sso %}
             <form method="post">
               {% csrf_token %} {{ form.non_field_errors }}
               <input type="hidden" name="next" value="{{next}}" />
@@ -27,8 +28,11 @@
               </button>
             </form>
             <hr class="my-4" />
+            {% endif %}
             <div class="text-center">
+              {% if not require_sso %}
               <p>OR</p>
+              {% endif %}
               <a
                 href="{% url 'init-m365-auth' %}"
                 title="Log in with your Microsoft 365 account (single-sign-on)"

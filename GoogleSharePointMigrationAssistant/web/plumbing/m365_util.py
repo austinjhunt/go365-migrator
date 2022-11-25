@@ -91,11 +91,10 @@ def get_token_from_request_session(request: HttpRequest):
         save_cache(request, cache)
     return result
 
-
-
-
-def get_token_from_cache(cache: SerializableTokenCache = None):
+def get_token_from_cache(m365_token_cache = None):
     """ given a serializable token cache, get the MSAL app from it """
+    cache = SerializableTokenCache()
+    cache.deserialize(m365_token_cache)
     auth_app = get_msal_app(cache)
     accounts = auth_app.get_accounts()
     if accounts:

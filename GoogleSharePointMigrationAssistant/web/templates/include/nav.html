@@ -56,28 +56,14 @@
           class="dropdown-menu dropdown-menu-end"
           aria-labelledby="nav-accounts-dropdown"
         >
-          {% if not google_user %}
-          <a
-            class="dropdown-item"
-            href="{% url 'init-google-auth' %}"
-            title="Authorize this app to access your Google account"
-            ><i class="fa fa-brands fa-google"></i> Sign into Google
-          </a>
-          {% else %}
+          {% if google_user %}
           <span class="dropdown-item">
             <i class="fa fa-brands fa-google"></i>
             {{google_user.email_address}}
           </span>
           {% endif %}
           <div class="dropdown-divider"></div>
-          {% if not m365_user %}
-          <a
-            class="dropdown-item"
-            href="{% url 'init-m365-auth' %}"
-            title="Authorize this app to access your Microsoft account"
-            ><i class="fa fa-brands fa-microsoft"></i> Sign into Microsoft 365
-          </a>
-          {% else %}
+          {% if m365_user %}
           <span class="dropdown-item">
             <i class="fa fa-brands fa-microsoft"></i>
             {{m365_user.email_address}}

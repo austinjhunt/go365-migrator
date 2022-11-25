@@ -131,7 +131,7 @@ class Migration(models.Model):
 
     @property 
     def target_document_library_id(self):
-        return self.target["details"]["document_library"]["name"]
+        return self.target["details"]["document_library"]["id"]
 
     @property 
     def target_site(self):
@@ -191,6 +191,12 @@ class AdministrationSettings(models.Model):
 
     organization_name = models.CharField(max_length=128, blank=True, null=True)
 
+    require_idp_login = models.BooleanField(
+        default=False, verbose_name=(
+            'Require Single Sign On (login via the IdP). '
+            'If true, local login form (username, password) will be disabled.')
+    )
+
     # For OAuth-driven migrations (user-driven)
     google_oauth_json_credentials = models.JSONField(
         null=True, blank=True, verbose_name='Google OAuth Credentials - JSON (Copy and Paste)')
@@ -199,7 +205,7 @@ class AdministrationSettings(models.Model):
 
     # SMTP-based email notifications.
     smtp_enable_email_notifications = models.BooleanField(
-        default=False, verbose_name='Do you want to enable email notifications (on migration completion)? If so, the below fields will be required.')
+        default=False, verbose_name='Enable email notifications (on migration completion)? If enabled, SMTP fields will be required.')
     smtp_username = models.CharField(
         max_length=64, null=True, blank=True, verbose_name='SMTP Username')
     smtp_password = models.CharField(
@@ -213,13 +219,13 @@ class AdministrationSettings(models.Model):
 
     # Twilio
     twilio_enable_sms_notifications = models.BooleanField(
-        default=False, verbose_name='Do you want to enable SMS notifications for users? If so, the Twilio settings below will be required.')
+        default=False, verbose_name='Enable SMS notifications for users. If enabled, Twilio settings will be required.')
     twilio_messaging_service_sid = models.CharField(
-        max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Messaging Service SID')
+        max_length=32, null=True, blank=True, verbose_name='Twilio Messaging Service SID')
     twilio_account_sid = models.CharField(max_length=32, null=True, blank=True,
-                                          verbose_name='Provide your Twilio Account SID (from your Twilio account dashboard)')
+                                          verbose_name='Twilio Account SID (from your Twilio account dashboard)')
     twilio_account_auth_token = models.CharField(
-        max_length=32, null=True, blank=True, verbose_name='Provide your Twilio Account Auth Token (from your Twilio account dashboard)')
+        max_length=32, null=True, blank=True, verbose_name='Twilio Account Auth Token (from your Twilio account dashboard)')
 
     # Azure AD / Microsoft AuthN/AuthZ
     azure_ad_client_id = models.CharField(
