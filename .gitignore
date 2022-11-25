@@ -9,3 +9,4 @@ pagnotta.json
 staticfiles
 *.sqlite3
 *.rdb
+migration-logs

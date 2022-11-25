@@ -22,7 +22,7 @@ urlpatterns = [
 
     # migration source selection
     path('use-google-drive-folder-source/<str:item_id>', UseGoogleDriveFolderSourceView.as_view(), name='use-google-drive-folder-source'),
-    path('use-google-drive-shared-drive-source/<str:item_id>', UseGoogleDriveFolderSourceView.as_view(), name='use-google-drive-shared-drive-source'),
+    path('use-google-drive-shared-drive-source/<str:item_id>', UseGoogleDriveSharedDriveSourceView.as_view(), name='use-google-drive-shared-drive-source'),
     path('change-source', ChangeSourceView.as_view(), name='change-source'),
 
     # migration destination selection 
