@@ -1,59 +1,142 @@
-{% extends 'include/master.html' %} {% block content %}
-<div class="container text-center h-100 position-relative">
-  {% if migration.source_data_scan_result %} {% if migration.source_data_scan_result.total_migratable_count > 0 %}
-  <div class="my-3">
-    <h3 class="my-2">Migratable Files</h3>
-    <div class="d-flex justify-content-center">
-      <span class="badge"
-        >Total Size:
-        {{migration.source_data_scan_result.total_migratable_size}}</span
+{% extends 'include/master.html' %} {% block content %} {% load custom %}
+<div
+  class="container  text-center h-100 position-relative"
+  id="scan_report"
+>
+  {% if migration.source_data_scan_result %}
+  <ul class="nav nav-tabs" id="files-categories-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active"
+        id="migratable-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#migratable-files"
+        type="button"
+        role="tab"
+        aria-controls="migratable-files"
+        aria-selected="true"
       >
-      <span class="badge"
-        >Total Count:
-        {{migration.source_data_scan_result.total_migratable_count}}</span
+        Migratable Files <i class="fa fa-smile"></i>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="unmigratable-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#unmigratable-files"
+        type="button"
+        role="tab"
+        aria-controls="unmigratable-files"
+        aria-selected="false"
       >
+        Unmigratable Files <i class="fa fa-frown"></i>
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content" id="files-categories-tabs-content">
+    <div
+      class="tab-pane fade show active "
+      id="migratable-files"
+      role="tabpanel"
+      aria-labelledby="migratable-tab"
+    >
+      {% if migration.source_data_scan_result.total_migratable_count > 0 %}
+      <div class="my-3 p-3 rounded bg-dark">
+        <div class="d-flex justify-content-center">
+          <span class="mx-2"
+            >Total Size:
+            {{migration.source_data_scan_result.total_migratable_size}}</span
+          >
+          <span class="mx-2"
+            >Total Count:
+            {{migration.source_data_scan_result.total_migratable_count}}</span
+          >
+        </div>
+        <table class="table table-striped table-dark datatable text-start w-100">
+          <thead>
+            <tr>
+              <th colspan="3">Migratable Files List</th>
+            </tr>
+            <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in migration.source_data_scan_result.migratable_files_list %}
+            <tr>
+              <td>{{f.name}}</td>
+              <td>{{f.size | prettify_filesize}}</td>
+              <td>{{f.mimeType | prettify_mimetype}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="my-3 p-3 rounded bg-dark">
+        <h3 class="my-2">No migratable files were found in the scan.</h3>
+      </div>
+      {% endif %}
     </div>
-    <label for="migratable-files-list">Migratable Files List</label>
-    <textarea
-      id="migratable-files-list"
-      style="height: 500px; overflow-y: scroll"
-      disabled
-      class="form-control text-left json-text"
+    <div
+      class="tab-pane fade"
+      id="unmigratable-files"
+      role="tabpanel"
+      aria-labelledby="unmigratable-tab"
     >
-{{migration.source_data_scan_result.migratable_files_list}}</textarea
-    >
+      {% if migration.source_data_scan_result.total_unmigratable_count > 0 %}
+      <div class="my-3 p-3 rounded bg-dark">
+        <div class="d-flex justify-content-center">
+          <span class="mx-2"
+            >Total Size:
+            {{migration.source_data_scan_result.total_unmigratable_size}}</span
+          >
+          <span class="mx-2"
+            >Total Count:
+            {{migration.source_data_scan_result.total_unmigratable_count}}</span
+          >
+        </div>
+        <table class="table table-striped table-dark datatable w-100">
+          <thead>
+            <tr>
+              <th colspan="3">Unmigratable Files List</th>
+            </tr>
+            <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in migration.source_data_scan_result.unmigratable_files_list %}
+            <tr>
+              <td>{{f.name}}</td>
+              <td>{{f.size | prettify_filesize}}</td>
+              <td>{{f.mimeType | prettify_mimetype}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <h3 class="my-2">No unmigratable files were found in the scan.</h3>
+      {% endif %}
+    </div>
   </div>
   {% else %}
-  <div class="my-3">
-    <h3 class="my-2">No migratable files were found in the scan.</h3>
-  </div>
-  {% endif %} {% if migration.source_data_scan_result.total_unmigratable_count > 0 %}
-  <div class="my-3">
-    <h3 class="my-2">Unmigratable Files</h3>
-    <div class="d-flex justify-content-center">
-      <span class="badge"
-        >Total Size:
-        {{migration.source_data_scan_result.total_unmigratable_size}}</span
-      >
-      <span class="badge"
-        >Total Count:
-        {{migration.source_data_scan_result.total_unmigratable_count}}</span
-      >
-    </div>
-    <label for="unmigratable-files-list">Unmigratable Files List</label>
-    <textarea
-      id="unmigratable-files-list"
-      style="height: 500px; overflow-y: scroll"
-      disabled
-      class="form-control text-left json-text"
-    >
-{{migration.source_data_scan_result.unmigratable_files_list}}</textarea
-    >
-  </div>
-  {% else %}
-  <h3 class="my-2">No un migratable files were found in the scan.</h3>
-  {% endif %} {% else %}
   <p class="lead">Looks like your scan is still running.</p>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      listenForScanReportUpdate({
+        intervalMilliseconds: 4000, 
+        migration_id: {{migration.id}},
+        callback: () => {window.location.reload()}
+      });
+    });
+  </script>
   {% endif %}
 
   <div class="position-relative bottom-0 right- mb-0 text-end">

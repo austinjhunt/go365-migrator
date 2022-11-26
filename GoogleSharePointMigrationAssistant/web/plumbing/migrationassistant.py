@@ -8,6 +8,13 @@ from .base import BaseUtil
 from .notif.notifier import Notifier
 from ..models import Migration
 from django.contrib.auth.models import User
+from django.core.cache import cache as django_cache
+
+def get_migration_from_cache(migration_id):
+    migration = django_cache.get(f'migration-{migration_id}', None)
+    if not migration:
+        migration = Migration.objects.get(id=migration_id)
+    return migration 
 
 class MigrationAssistant(BaseUtil):
     def __init__(
@@ -65,11 +72,11 @@ class MigrationAssistant(BaseUtil):
     def notify_completion(self): 
         self.notifier = Notifier() 
         self.notifier.notify_completion(
-            migration_info=self.migration,  
-            num_files_migrated=self.downloader.num_files_downloaded,
-            num_files_already_migrated=self.downloader.num_files_already_in_destination,
-            num_files_skipped=self.downloader.num_files_skipped,
-            total_drive_files=self.downloader.total_drive_files, 
+            migration=self.migration,  
+            num_files_migrated=self.downloader.num_files_downloaded,# FIXME: should be stored as part of migration data, not downloader
+            num_files_already_migrated=self.downloader.num_files_already_in_destination,# FIXME: should be stored as part of migration data, not downloader
+            total_migratable_drive_files=self.migration.source_data_scan_result['total_migratable_count'],
+            total_unmigratable_drive_files=self.migration.source_data_scan_result['total_unmigratable_count'],
             elapsed_time=self.migration_elapsed_time_seconds) 
 
     def upload_logs_to_destination(self):
@@ -117,13 +124,18 @@ def scan_data_source(migration_id: int = 0, google_credentials: dict = {}, user_
     """ Scan source data asynchronously """
     user = User.objects.get(id=user_id)
     migration = Migration.objects.get(id=migration_id)
+    migration.state = Migration.STATES.SCANNING
+    migration.save()
     assistant = MigrationAssistant(
             migration=migration, 
-            name=f'migration-{user.username}', 
+            name=f'migration-{user.username}-mig-{migration.id}', 
             google_credentials=google_credentials,
             user=user
             )
-    return assistant.scan_data_source()
+    scan_result = assistant.scan_data_source()
+    migration.states = Migration.STATES.SCAN_COMPLETE
+    migration.save()
+    return scan_result
 
 @shared_task 
 def migrate_data(migration_id: int = 0, google_credentials: dict = {}, user_id: int = 0, m365_token_cache: dict = {}):
@@ -131,12 +143,21 @@ def migrate_data(migration_id: int = 0, google_credentials: dict = {}, user_id: 
     migration = Migration.objects.get(id=migration_id)
     assistant = MigrationAssistant(
         migration=migration,
-        name=f'Migration-{user.username}',
+        name=f'migration-{user.username}-mig-{migration.id}', 
         google_credentials=google_credentials,
         user=user,
         m365_token_cache=m365_token_cache
     )
-    return assistant.migrate()
+    migration.state = Migration.STATES.MIGRATING
+    migration.save()
+    migration_response = assistant.migrate()
+    migration.state = Migration.STATES.MIGRATION_COMPLETE
+    migration.save()
+    # TODO: Save something to model for migration report 
+    assistant.notify_completion()
+    return migration_response
+
+
 # def clear_logs(assistant: MigrationAssistant = None):
 #     print('Clearing logs')
 #     if assistant:

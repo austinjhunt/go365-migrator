@@ -185,6 +185,10 @@ a.hide {
   transition: 0.2s linear;
 }
 
+.dataTables_length select {
+  color: #fff;
+}
+
 .colorbackground {
   background: linear-gradient(-45deg, #4285f4, #0f9d58, #f4b400, #db4437, #ffbb00, #00a1f1);
   background-size: 400% 400%;

@@ -36,11 +36,8 @@ class GoogleDownloader(BaseLogging):
         self.folder_type = 'application/vnd.google-apps.folder'  
         self.wait_for_confirmation_before_migrating = wait_for_confirmation_before_migrating
         self.uploader = uploader
-
-        # init 
         self.num_files_already_in_destination = 0
         self.local_temp_dir = os.path.join(os.path.dirname(__file__), local_temp_dir)
-        self.info(f'self.local_temp_dir={self.local_temp_dir}')
         self.num_active_downloads = 0 
         self.uploader_running = False 
         self.current_batch_downloaded = 0 

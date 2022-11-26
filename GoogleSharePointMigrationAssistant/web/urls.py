@@ -47,8 +47,11 @@ urlpatterns = [
   
     # scan before migrating
     path('scan-source', ScanSourceDataView.as_view(), name='scan-source'),
+    path('scan-source-report/listen/<slug:migration_id>/', ScanSourceReportListenView.as_view(), name='scan-source-report-listen'),
     path('scan-source-report/<slug:migration_id>', ScanSourceReportView.as_view(), name='scan-source-report'),
     
-    path('start-migration/<slug:migration_id>', StartMigrationView.as_view(), name='start-migration')
+    path('start-migration/<slug:migration_id>', StartMigrationView.as_view(), name='start-migration'),
+
+    path('get-migration-state/<slug:migration_id>/', GetMigrationStateView.as_view(), name='get-migration-state'),
 
 ]

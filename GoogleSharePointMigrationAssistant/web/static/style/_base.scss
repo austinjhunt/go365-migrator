@@ -199,3 +199,7 @@ a{
     transition: 0.2s linear;
   }
 }
+
+.dataTables_length select {
+  color: $text-color;
+}

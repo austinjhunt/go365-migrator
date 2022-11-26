@@ -1,7 +1,7 @@
 let CSRF_TOKEN;
 let toasty;
 document.addEventListener("DOMContentLoaded", function () {
-  CSRF_TOKEN = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+  CSRF_TOKEN = document.querySelector("input[name=csrfmiddlewaretoken]").value;
   function removeFadeOut(el, speed) {
     var seconds = speed / 1000;
     el.style.transition = "opacity " + seconds + "s ease";
@@ -16,31 +16,39 @@ document.addEventListener("DOMContentLoaded", function () {
   }, 1000);
   // initialize data tables
   $(".datatable").DataTable({
-    aaSorting: [] // disable initial sort
+    aaSorting: [], // disable initial sort
   });
 
   // initialize toasts
-  toasty = new bootstrap.Toast(document.querySelector('.toast'));
+  toasty = new bootstrap.Toast(document.querySelector(".toast"));
 
-  // initialize search/filter inputs 
-  try{
-    document.querySelector('#filter-input').addEventListener('input', (event) => {
-      let searchingOnId = event.target.dataset.searchingon;
-      let searchingOnElement = document.querySelector(`#${searchingOnId}`);
-      searchingOnElement.querySelectorAll('a').forEach(el=>{
-        if (el.textContent.toLowerCase().includes(event.target.value.toLowerCase())) {
-          el.classList.add('show'); el.classList.remove('hide');
-        } else {
-          el.classList.remove('show'); el.classList.add('hide');
-        }
-      })
-    })
-  } catch(e){}
-   
-  document.querySelectorAll('.json-text').forEach(el=>{
-    let obj = JSON.parse(el.value.replaceAll("'",'"')); // json parse does not work with single
+  // initialize search/filter inputs
+  try {
+    document
+      .querySelector("#filter-input")
+      .addEventListener("input", (event) => {
+        let searchingOnId = event.target.dataset.searchingon;
+        let searchingOnElement = document.querySelector(`#${searchingOnId}`);
+        searchingOnElement.querySelectorAll("a").forEach((el) => {
+          if (
+            el.textContent
+              .toLowerCase()
+              .includes(event.target.value.toLowerCase())
+          ) {
+            el.classList.add("show");
+            el.classList.remove("hide");
+          } else {
+            el.classList.remove("show");
+            el.classList.add("hide");
+          }
+        });
+      });
+  } catch (e) {}
+
+  document.querySelectorAll(".json-text").forEach((el) => {
+    let obj = JSON.parse(el.value.replaceAll("'", '"')); // json parse does not work with single
     el.value = JSON.stringify(obj, undefined, 4);
-  })
+  });
 });
 
 let selectSourceForMigration = (btn) => {
@@ -93,16 +101,84 @@ let confirmSelectedMigrationSources = () => {
   })
     .then((response) => response.json())
     .then((data) => {
-      let toast = document.querySelector('.toast');
-      if ('success' in data){
-        toast.querySelector('.toast-header strong').textContent = 'Confirmed';
-        toast.querySelector('.toast-body').textContent = 'Your selected migration sources are confirmed.';
+      let toast = document.querySelector(".toast");
+      if ("success" in data) {
+        toast.querySelector(".toast-header strong").textContent = "Confirmed";
+        toast.querySelector(".toast-body").textContent =
+          "Your selected migration sources are confirmed.";
         toasty.show();
-      } else if ('error' in data){ 
-        toast.querySelector('.toast-header strong').textContent = 'Error';
-        toast.querySelector('.toast-body').textContent = data['error'];
+      } else if ("error" in data) {
+        toast.querySelector(".toast-header strong").textContent = "Error";
+        toast.querySelector(".toast-body").textContent = data["error"];
         toasty.show();
       }
-      
+    });
+};
+
+let listenForScanReportUpdate = ({
+  intervalMilliseconds = 4000,
+  migration_id = 0,
+  callback = () => {}
+}) => {
+  setInterval(() => {
+    fetchMigrationScanReport({
+      migration_id: migration_id, 
+      callback: callback
+    })
+  }, intervalMilliseconds);
+};
+
+let listenForStateUpdate = ({
+  intervalMilliseconds = 4000, 
+  migration_id = 0, 
+  callback = () => {}
+}) => {
+  setInterval(() => {
+    fetchMigrationState({
+      migration_id:migration_id, 
+      callback: callback
+    })
+  }, intervalMilliseconds)
+}
+
+let fetchMigrationScanReport = ({
+  migration_id = 0,
+  callback = () => {}
+}) => {
+  fetch(`/scan-source-report/listen/${migration_id}/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": CSRF_TOKEN,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "complete") {
+        callback();
+      }
+    });
+}
+
+let fetchMigrationState = ({
+  migration_id = 0, 
+  callback = () => {}
+}) => {
+  fetch(`/migration-state-poll/${migration_id}/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": CSRF_TOKEN,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.error) {
+        console.log(
+          `Error retrieving state of migration ${migration_id}: ${data.error}`
+        );
+      } else {
+        callback();
+      }
     });
 };

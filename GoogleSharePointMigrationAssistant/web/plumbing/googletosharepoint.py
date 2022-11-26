@@ -411,7 +411,6 @@ class GoogleToSharePoint(BaseUtil):
     def _get_flattened_files_list_in_folder(self, folder: dict = {}, parent_folder_local_path: str = ''): 
         """ Traverse entire recursive hierarchy in folder and build/return a flattened
         list of files within """
-        self.info({'_get_flattened_files_list_in_folde': 'collecting files list'}) 
         files_list = []
         folder_name = sanitize(folder['name'])
         new_parent_folder_local_path = os.path.join(parent_folder_local_path, folder_name)
@@ -458,12 +457,14 @@ class GoogleToSharePoint(BaseUtil):
         files_list = []
         drive_children = self.get_children_from_drive(drive_id)
         files, folders = drive_children['files'], drive_children['folders']  
-        self.debug(
-            f'Shared Drive {drive_id} contains {len(files)} '
-            f'file children and {len(folders)} folder children'
-            )      
+        self.debug({
+            '_get_flattened_files_list_in_drive': {
+                'drive_id': drive_id, 
+                'num_children_files': len(files),
+                'num_children_folders': len(folders)
+            }})  
         for f in files:
-            if self.file_is_migratable(f) and not self._file_already_migrated(f):
+            if self.file_is_migratable(f):
                 self.total_migratable_files += 1
                 f['parent_folder_local_path'] =  self.local_temp_dir
                 f['name'] = f'{f["name"]}{self.get_o365_extension_from_file_mimetype(f["mimeType"])}' 
@@ -498,11 +499,12 @@ class GoogleToSharePoint(BaseUtil):
         """ Do not re-migrate files that are already in the target. 
         Obtain a list of what's in the target. Exclude those from current list
         files to migrate. """
-        self.info({'_exclude_files_already_migrated_from_source_file_list': 'Collecting list of files already in target.'})
         target_files_dict = self.uploader.get_flattened_files_dict_in_remote_folder(
             local_folder_base_path=self.local_temp_dir
         ) 
-        self.info({'_exclude_files_already_migrated_from_source_file_list': 'already-uploaded files list acquired'})
+        self.info({'_exclude_files_already_migrated_from_source_file_list': {
+            'target_files_dict_already_uploaded': target_files_dict
+        }})
         return [
             f for f in source_file_list if not self._file_already_migrated(
                 file=f, target_files_dict=target_files_dict)
@@ -559,12 +561,12 @@ class GoogleToSharePoint(BaseUtil):
         """ Must be called after scan has run. Scan populates self.migration.source_data_scan_result """
         self.info({'migrate': {'status': 'starting'}})
         migrate_files = self.migration.source_data_scan_result['migratable_files_list']
-        self.total_migratable_files = len(migrate_files)
+        # COPY LIST. Otherwise the database value itself changes (list items get popped.)
+        migrate_files_copy = migrate_files.copy()  
+        self.total_migratable_files = len(migrate_files_copy)
         response = self._migrate_files_list(
-            flattened_files_list=migrate_files
+            flattened_files_list=migrate_files_copy
         )
-        self.migration.state = Migration.STATES.COMPLETE
-        self.migration.save()
         self.info({'migrate':{'status': 'complete', 'response': response}})
         return response 
     
@@ -574,7 +576,6 @@ class GoogleToSharePoint(BaseUtil):
             if 'size' in f:
                 size += int(f['size'])
         return self.convert_size(size)
-
 
     def scan(self):
         self.info({'scan': {'status': 'starting'}})

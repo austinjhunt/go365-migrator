@@ -2,6 +2,7 @@ from django.views.generic import View, FormView
 from rest_framework import viewsets
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 import logging
 from ..models import Migration
@@ -10,9 +11,9 @@ from ..plumbing.m365_util import (
     get_user_onedrive_root_children, get_user_sharepoint_sites,
     get_sharepoint_site_document_libraries, get_sharepoint_site_by_id,
     get_sharepoint_doclib_by_id, get_sharepoint_doclib_children_by_id,
-    get_sharepoint_doclib_item_by_id, get_user_onedrive_item_by_id, 
-    load_cache, 
+    get_sharepoint_doclib_item_by_id, get_user_onedrive_item_by_id
 )
+from ..plumbing.migrationassistant import get_migration_from_cache
 from ..plumbing.migrationassistant import migrate_data
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ class StartMigrationView(View, LoginRequiredMixin):
             return render(
                 request=request,
                 template_name='error.html',
-                context={'error': 'You are not authorized perform this operation'}
+                context={'error': 'unauthorized'}
             )
         
 
@@ -172,3 +173,17 @@ class UseOneDriveDestinationViewSet(viewsets.ViewSet, LoginRequiredMixin):
 
 
 #### END ONEDRIVE DESTINATION ####
+
+
+#### STATE POLLING ####
+
+class MigrationStatePollView(View, LoginRequiredMixin):
+    def get(self, request, migration_id):
+        migration = get_migration_from_cache(migration_id=migration_id)
+        if request.user == migration.user:
+            data = {'success': {'state': migration.state}}
+        else:
+            data = {'error': 'unauthorized'}
+        return JsonResponse(data)
+
+#### END STATE POLLING ####

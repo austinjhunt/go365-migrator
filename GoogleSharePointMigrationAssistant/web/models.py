@@ -19,14 +19,15 @@ class Migration(models.Model):
         verbose_name_plural = 'Migrations'
 
     class STATES(models.TextChoices):
-        NEW = "NEW"
-        READY = "READY"  # waiting
-        PROCESSING = "PROCESSING"
-        STOPPING = "STOPPING"
-        FAILED = "FAILED"
-        COMPLETE = "COMPLETE"
+        WAITING_TO_SCAN = "Waiting to scan source data"
+        SCANNING = "Scanning source data"
+        SCAN_COMPLETE = "Source data scan is complete"
+        WAITING_TO_MIGRATE = "Waiting to migrate source data to target"
+        MIGRATING = "Migrating source data to target"
+        MIGRATION_FAILED = "Migration to target failed"
+        MIGRATION_COMPLETE = "Migration is complete"
     state = models.CharField(
-        max_length=20, choices=STATES.choices, default=STATES.NEW, db_index=True
+        max_length=56, choices=STATES.choices, default=STATES.WAITING_TO_SCAN, db_index=True
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
@@ -156,32 +157,6 @@ class Migration(models.Model):
     @property 
     def job_status(self):
         return self.state.capitalize()
-
-
-    def start_job(self):
-        """ Change state of this job to processing and save """
-        self.state = self.STATES.PROCESSING
-        self.save()
-
-    def save(self, *args, **kwargs):
-        """ Customize the save method to trigger the next READY task if there is one (to achieve queue behavior) """
-        if self.state == self.STATES.NEW:
-            if Migration.objects.filter(state__in=[
-                self.STATES.PROCESSING,
-                self.STATES.STOPPING
-            ]).count() > 0:
-                self.state = self.STATES.READY
-            else:
-                self.state = self.STATES.PROCESSING
-
-        elif self.state in [
-            self.STATES.COMPLETE,
-            self.STATES.FAILED
-        ]:
-            ready_jobs = Migration.objects.filter(state=self.STATES.READY)
-            if ready_jobs.count() > 0:
-                ready_jobs[0].start_job()
-        super(Migration, self).save(*args, **kwargs)
 
 
 class AdministrationSettings(models.Model):

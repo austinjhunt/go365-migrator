@@ -6,7 +6,7 @@ The migration of your Google Drive files (in the ${GOOGLE_SOURCE_NAME} ${GOOGLE_
 
 Please note that your files were merely copied to SharePoint, and no files were deleted from your Google Drive. You are responsible for the deletion of your own files from Google Drive to stay below the storage quota.  
 
-All in all, there were ${TOTAL_DRIVE_FILES} total migratable files in the Google Drive Source. ${NUM_FILES_MIGRATED} total files were migrated from your source to your destination. ${SKIPPED_MESSAGE}  
+All in all, there were ${TOTAL_MIGRATABLE_DRIVE_FILES} total migratable files in the Google Drive Source. ${NUM_FILES_MIGRATED} total files were migrated from your source to your destination. ${SKIPPED_MESSAGE}  
 
 Please check your destination ( ${FULL_DESTINATION_URL} ) to ensure that your files appear to have migrated successfully. 
 

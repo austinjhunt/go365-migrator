@@ -1,8 +1,9 @@
 {% extends 'include/master.html' %} {% block content %}
-<div class="container">
+{% load custom %}
+<div class="container my-3 p-3 rounded bg-dark">
   <div class="row">
     {% if migrations %} 
-    <table class="datatable table">
+    <table class="datatable table table-striped table-dark datatable text-start w-100">
       <thead>
         <tr><p>Your Data Migrations</p></th>
         <tr>

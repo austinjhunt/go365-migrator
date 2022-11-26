@@ -7,7 +7,7 @@
 
 - DNS
 - Linode, or EC2 instance...
-- Twilio MSGing service with callback
+- Twilio MSGing service with callback. Ask user if they want SMS notifications if admin has SMS notifs enabled. 
 - AWS EC2 & lambda provisioning?
 - Change Admin settings form to use password inputs
 - Change admin settings to use list component for list items, e.g. js origins and redirect URIs
@@ -15,3 +15,5 @@
 - Use AAD application setting to determine user provisioning from SSO
 - Make "confirm source selections" auto-redirect to next step instead of having to click another "Continue" button
 - Use S3 instead of file system. MVP status currently. 
+- Progress tracking? 
+- State changes - Scanning & Scan complete added to migrations list table. Listen with JS polling. Let "Scanned" be a state. Set that when scan complete. (Ready to migrate.)

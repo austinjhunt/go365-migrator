@@ -32,13 +32,35 @@
         >
       </li>
       {% else %}
-      <li class="nav-item">
+      <li class="nav-item dropdown">
         <a
-          href="{% url 'list-migrations' %}"
-          title="view all of your migrations"
-          class="btn btn-outline-light me-2 nav-link text-light"
-          >Migrations</a
+          class="nav-link dropdown-toggle btn btn-outline-light me-2 nav-link text-light"
+          href="#"
+          id="nav-migrations"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
         >
+          Migrations
+        </a>
+        <div
+          class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="nav-migrations-dropdown"
+        > 
+          <a
+            href="{% url 'setup' %}"
+            title="set up a new migration"
+            class="dropdown-item"
+            ><i class="fa fa-plus"></i> New Migration</a
+          >
+          <a
+            href="{% url 'list-migrations' %}"
+            title="view all of your migrations"
+            class="dropdown-item"
+            ><i class="fa fa-list"></i> View Migrations</a
+          >
+        </div>
       </li>
       <li class="nav-item dropdown">
         <a

@@ -1,9 +1,11 @@
 from django.views.generic import View 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, render
+from django.http import JsonResponse
 from ..models import Migration
-from ..plumbing.migrationassistant import scan_data_source
-
+from ..plumbing.migrationassistant import (
+    scan_data_source, get_migration_from_cache 
+)
 
 class ScanSourceDataView(View, LoginRequiredMixin):
     def get(self, request):
@@ -37,7 +39,7 @@ class ScanSourceDataView(View, LoginRequiredMixin):
 
 class ScanSourceReportView(View, LoginRequiredMixin):
     def get(self, request, migration_id):
-        migration = Migration.objects.get(id=migration_id)
+        migration = get_migration_from_cache(migration_id=migration_id)
         if migration.user == request.user:
             return render(
                 request=request,
@@ -48,3 +50,19 @@ class ScanSourceReportView(View, LoginRequiredMixin):
             )
         else:
             return redirect('list-migrations')
+
+class ScanSourceReportListenView(View, LoginRequiredMixin):
+    def get(self, request, migration_id):
+        migration = get_migration_from_cache(migration_id=migration_id)
+        if migration.user == request.user:
+            status, scan_result = ('complete', migration.source_data_scan_result) if migration.source_data_scan_result else ('in_progress', None)
+            return JsonResponse({
+                'status': status, 
+                'migration_id': migration_id, 
+                'scan_result': scan_result
+            })
+        else:
+            return JsonResponse({
+                'error': 'unauthorized'
+            })
+        
