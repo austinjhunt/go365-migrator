@@ -43,7 +43,7 @@ def get_sign_in_flow():
     """ generate a sign-in flow """
     auth_app = get_msal_app()
     return auth_app.initiate_auth_code_flow(
-        scopes=settings.AAD_CLIENT_SCOPES,  # for just signing in
+        scopes=settings.AAD_CLIENT_SCOPES, 
         redirect_uri='http://localhost:8000/m365-redirect-uri', #FIXME - do not hardcode
     )
 
@@ -74,7 +74,6 @@ def get_token_from_code(request):
     save_cache(request, cache)
     return result
 
-
 def get_token_from_request_session(request: HttpRequest):
     """ Given a request object, obtain a token cache using its .session attribute, 
     then re-save that cache in the session """
@@ -87,7 +86,8 @@ def get_token_from_request_session(request: HttpRequest):
     accounts = auth_app.get_accounts()
     if accounts:
         result = auth_app.acquire_token_silent(
-            settings.AAD_CLIENT_SCOPES, account=accounts[0])
+            settings.AAD_CLIENT_SCOPES, 
+            account=accounts[0])
         save_cache(request, cache)
     return result
 
@@ -99,7 +99,8 @@ def get_token_from_cache(m365_token_cache = None):
     accounts = auth_app.get_accounts()
     if accounts:
         result = auth_app.acquire_token_silent(
-            settings.AAD_CLIENT_SCOPES, account=accounts[0])
+            settings.AAD_CLIENT_SCOPES, 
+            account=accounts[0])
     return result
 
 

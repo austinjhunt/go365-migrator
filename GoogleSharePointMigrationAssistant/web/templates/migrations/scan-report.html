@@ -133,7 +133,7 @@
       listenForScanReportUpdate({
         intervalMilliseconds: 4000, 
         migration_id: {{migration.id}},
-        callback: () => {window.location.reload()}
+        callback: (data) => {window.location.reload()}
       });
     });
   </script>

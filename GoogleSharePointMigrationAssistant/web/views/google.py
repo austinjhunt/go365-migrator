@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 MIMETYPES = {
     "application/pdf": "PDF",
+    "application/vnd.google.colaboratory": "Google Colab Notebook",
     "application/x-httpd-php": "PHP",
     "application/vnd.google-apps.audio": "Audio",
     "application/vnd.google-apps.document": "Google Docs",
@@ -136,7 +137,8 @@ def start_oauth_flow(request, config):
     flow.redirect_uri = config.google_oauth_json_credentials['web']['redirect_uris'][0]
     authorization_url, state = flow.authorization_url(
         access_type='offline',
-        include_granted_scopes='true')
+        include_granted_scopes='true', 
+        prompt='consent')
     request.session['google_oauth_state'] = state
     return redirect(authorization_url)
 

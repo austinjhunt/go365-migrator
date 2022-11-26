@@ -49,7 +49,19 @@
               <td>N/A</td>
               <td>N/A</td>
             {% endif %}
-            <td>{{mig.job_status}}</td>
+            <td id="job-state-{{mig.id}}">{{mig.job_status}}</td>
+            <script>
+              document.addEventListener("DOMContentLoaded", function () {
+                listenForStateUpdate({
+                  intervalMilliseconds: 5000, 
+                  migration_id: {{mig.id}},
+                  callback: (state) => {
+                    document.getElementById('job-state-' + {{mig.id}}).textContent = state;
+                  }
+                });
+              });
+              
+            </script>
           </tr>
         {% endfor %}
       </tbody>

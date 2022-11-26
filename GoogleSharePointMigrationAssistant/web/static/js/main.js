@@ -155,7 +155,7 @@ let fetchMigrationScanReport = ({
     .then((response) => response.json())
     .then((data) => {
       if (data.status === "complete") {
-        callback();
+        callback(data);
       }
     });
 }
@@ -178,7 +178,7 @@ let fetchMigrationState = ({
           `Error retrieving state of migration ${migration_id}: ${data.error}`
         );
       } else {
-        callback();
+        callback(data.success.state);
       }
     });
 };

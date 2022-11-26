@@ -133,7 +133,7 @@ def scan_data_source(migration_id: int = 0, google_credentials: dict = {}, user_
             user=user
             )
     scan_result = assistant.scan_data_source()
-    migration.states = Migration.STATES.SCAN_COMPLETE
+    migration.state = Migration.STATES.SCAN_COMPLETE
     migration.save()
     return scan_result
 

@@ -25,7 +25,6 @@ class MicrosoftSingleSignOnView(View):
             return redirect('login')
 
 class MicrosoftSingleSignOnCallbackView(View):
-    
     def get(self, request):
         result = get_token_from_code(request)
         graph_user_data = get_user_profile(request)

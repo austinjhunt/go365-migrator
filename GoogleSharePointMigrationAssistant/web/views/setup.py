@@ -30,7 +30,7 @@ class SetupView(LoginRequiredMixin, View):
             context['source_selected'] = request.session['source_selected']
 
         elif not 'migration_started' in request.session:
-            step = 'start_migration'
+            step = 'start_scan'
             context['source_selected'] = request.session['source_selected']
             context['destination_selected'] = request.session['destination_selected']
 
