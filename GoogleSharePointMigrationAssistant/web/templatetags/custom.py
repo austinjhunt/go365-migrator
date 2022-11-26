@@ -9,6 +9,8 @@ def prettify_mimetype(mimetype):
 
 def prettify_filesize(size_bytes):
     """ Convert size in bytes to size in friendly format. """
+    if not size_bytes:
+        return 'N/A' # Some google app files, eg. google docs, have no size property 
     if isinstance(size_bytes, str): 
         size_bytes = int(size_bytes)
     if size_bytes == 0:
