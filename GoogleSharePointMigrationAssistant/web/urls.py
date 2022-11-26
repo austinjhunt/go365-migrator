@@ -52,6 +52,6 @@ urlpatterns = [
     
     path('start-migration/<slug:migration_id>', StartMigrationView.as_view(), name='start-migration'),
 
-    path('get-migration-state/<slug:migration_id>/', GetMigrationStateView.as_view(), name='get-migration-state'),
+    path('migration-state-poll/<slug:migration_id>/', MigrationStatePollView.as_view(), name='get-migration-state'),
 
 ]
