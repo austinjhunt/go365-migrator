@@ -209,3 +209,24 @@ class AdministrationSettings(models.Model):
         max_length=128,  null=True, blank=True, verbose_name='Azure AD App Registration - Client Secret')
     azure_ad_tenant_id = models.CharField(
         max_length=128,  null=True, blank=True, verbose_name='Azure AD App Registration - (Directory) Tenant ID')
+
+    onedrive_email_notification_template = models.TextField(
+        blank=True, null=True, 
+        verbose_name='Email Body Template for Google to OneDrive Migration Email Notification',
+        default=""
+    )
+    onedrive_sms_notification_template = models.TextField(
+        blank=True, null=True, 
+        verbose_name='SMS Message Template for Google to OneDrive Migration SMS Notification',
+        default=""
+    )
+    sharepoint_email_notification_template = models.TextField(
+        blank=True, null=True, 
+        verbose_name='Email Body Template for Google to SharePoint Migration Email Notification',
+        default=""
+    )
+    sharepoint_sms_notification_template = models.TextField(
+        blank=True, null=True, 
+        verbose_name='SMS Message Template for Google to SharePoint Migration SMS Notification',
+        default=""
+    )
