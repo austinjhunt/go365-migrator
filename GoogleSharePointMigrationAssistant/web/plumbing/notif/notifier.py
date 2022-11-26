@@ -21,7 +21,7 @@ class Notifier(BaseUtil):
         self.smtp_password = config.smtp_password
         self.smtp_port = config.smtp_port
         self.smtp_server = config.smtp_server
-        self.subject = config.smtp_subject 
+        self.subject = config.smtp_subject if config.smtp_subject else "Google Drive to SharePoint Migration Complete"
 
     def notify_completion(self, 
         migration: Migration = None, 
