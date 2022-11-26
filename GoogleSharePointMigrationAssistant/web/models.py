@@ -39,6 +39,7 @@ class Migration(models.Model):
     end_timestamp = models.DateTimeField(blank=True, null=True)
 
     google_source = models.JSONField(
+        default=dict,
         null=True, blank=True, verbose_name=(
             'JSON object including at minimum id, name, '
             'or type as keys describing the source folder '
@@ -46,6 +47,7 @@ class Migration(models.Model):
             '"shared_drive" or "folder"')
     )
     source_data_scan_result = models.JSONField(
+        default=dict,
         null=True, blank=True, 
         verbose_name=(
             'High-level stats about the migration '
@@ -67,7 +69,7 @@ class Migration(models.Model):
         default=False, verbose_name='Whether a post-completion notification has been sent')
 
     target = models.JSONField(
-        blank=True, null=True, default={}, 
+        blank=True, null=True, default=dict, 
         verbose_name=(
             'Information describing either a SharePoint '
             'Site Folder in a Document Library or a OneDrive '
@@ -174,8 +176,10 @@ class AdministrationSettings(models.Model):
 
     # For OAuth-driven migrations (user-driven)
     google_oauth_json_credentials = models.JSONField(
+        default=dict,
         null=True, blank=True, verbose_name='Google OAuth Credentials - JSON (Copy and Paste)')
     google_service_account_auth_json_credentials = models.JSONField(
+        default=dict,
         null=True, blank=True, verbose_name='Google Service Account Credentials - JSON (Copy and Paste)')
 
     # SMTP-based email notifications.
