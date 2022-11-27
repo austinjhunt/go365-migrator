@@ -2,9 +2,9 @@
 
 This is a multithreaded, configurable, automated migration assistant for migrating files out of Google Drive into SharePoint Online or OneDrive for Business. It was built for a Vanderbilt University CS 6387 Topics in SWE: Security final project. The context for the project was College of Charleston's enterprise level file migration in light of new Google-enforced storage quotas starting in 2022. This is a problem that also affects a number of other universities, as seen in [these Google query results for `site:edu "google storage" "change" "data" "limit"`](https://www.google.com/search?q=site%3Aedu+%22google+storage%22+%22change%22+%22data%22+%22limit%22&oq=site%3Aedu+%22google+storage%22+%22change%22+%22data%22+%22limit%22+&aqs=chrome..69i57j69i58.11364j0j9&sourceid=chrome&ie=UTF-8)
 
-This project started out with simple service-account based authentication without a web app, meaning some admin would have had to manually set up migrations for functional users, run them, monitor them, etc. I wanted to build something that could offload that responsibility to the functional user such that they could grant the application access to their data and start their own migration without (or with minimal) IT involvement. In other words, I wanted to build an app that used OAuth and [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) to perform migration operations on behalf of a signed in user. 
+This project started out with simple service-account based authentication without a web app, meaning some admin would have had to manually set up migrations for functional users, run them, monitor them, etc. I wanted to build something that could offload that responsibility to the functional user such that they could grant the application access to their data and start their own migration without (or with minimal) IT involvement. In other words, I wanted to build an app that used [OAuth 2.0](https://developers.google.com/identity/protocols/oauth2) and [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) to perform migration operations *on behalf* of a signed in user. 
 
-With the service account approach, an admin would set up a Google project and a SharePoint application for authentication on both sides, and then define a JSON-formatted map (example in [map.json](src/map.json)) from the Google source location(s) to the respective SharePoint target location(s), then run it and sip their coffee.
+# Problem, Context
 
 Before kicking off, I personally tried using Google's built-in Google Takeout integration for OneDrive on my CofC Google Account huntaj@g.cofc.edu and this did not work because the tool is not set up to recognize OneDrive for Business accounts. Screenshots below demonstrate this issue.
 
@@ -23,36 +23,27 @@ We first attempted couple of large scale (approx 5 TB total) data migrations usi
 
 Moreover, we are not heavily staffed and having a way for users to self-enqueue their own file migrations would offload a significant amount of work from the central team. Having an organization-wide web app that offers users the ability to authorize and queue their own migrations from Google to OneDrive or SharePoint -- and view logs of those migrations themselves that they can provide if/when they request support -- would be a step up from having to manage all migrations centrally ourselves. Plus, central management also means more of a bottleneck, which means more waiting for the functional users. 
 
-## Need for Speed
+## Implementation
 
-This project leverages Python multithreading via the [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) class from the [concurrent.futures](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) package which offers a significant performance improvement over the previously attempted single-threaded approach for both downloading and uploading. In order to make interaction with the Google Drive v3 API thread-safe, I implemented the instructions found [here](https://github.com/googleapis/google-api-python-client/blob/main/docs/thread_safety.md). I didn't have to do anything special to make the SharePoint uploading thread-safe.
-
-## Without a Web App - the JSON-Driven Scripted Approach 
-
-The project takes your provided JSON-formatted migration [map](src/map.json) (i.e. mapping sources in Google to destinations in SharePoint), and does the following for each migration in the JSON array:
-
-1. Builds an in-memory tree of the full Google drive source
-2. Using the in-memory tree, downloads a configurable-size batch of files from Google source with multithreading
-3. Triggers a SharePoint uploader to upload (with multithreading) that new batch of downloaded files to the specified target/destination SharePoint site's document library (with optional base folder)
-4. Removes the local files after SharePoint Uploader has finished its upload process
-5. Starts back over at step 2 with a new configurable-size batch of files that have not yet been downloaded
-
-## Authentication & Authorization
+### Authentication & Authorization Against Google
 
 Authenticating against Google can be done one of two ways:
 
-1. With a [service account](https://cloud.google.com/iam/docs/service-accounts) (which I recommend). This requires that the service account be granted access to each drive/folder being migrated ahead of the migration. You can do this by getting the data owner to Share the folder with the email address of the service account once you create one. The 
-2. With OAuth InstalledAppFlow. In this case, the app runs on behalf of a user and leverages the signed in user's access to the data to be migrated. Requires the user to be involved in the migration process. Also requires that you run the assistant in an environment that can open a web browser, since a web browser is needed for you to sign into your Google Account and grant access to the application. Google's OAuth 2.0 flow conforms to the Open ID Connect specification, meaning it can be used for both authentication and authorization. 
+1. With a [service account](https://cloud.google.com/iam/docs/service-accounts). This requires that the service account be granted access to each drive/folder being migrated ahead of the migration.
+2. With OAuth InstalledAppFlow. In this case, the app runs on behalf of a user and leverages the signed in user's access to the data to be migrated. This obviously requires the user to be involved in the migration process and it also requires that you run the assistant in an environment that can open a web browser, since a web browser is needed for you to sign into your Google Account and grant access to the application. Google's OAuth 2.0 flow conforms to the [OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html), meaning it can be used for both authentication and authorization. 
 
-### Google OAuth
+#### The Google Service Account Approach
+If using a service account, either that service account needs to be granted access to the data being migrated (by the user who owns the data), or the service account needs to be set up with [domain-wide delegation](https://developers.google.com/identity/protocols/oauth2/service-account?authuser=2#delegatingauthority) which means it could access everyone's data without their granting access explicitly. Very convenient but very risky. 
 
-For the Google OAuth option implementation, I followed [these steps](https://developers.google.com/drive/api/quickstart/python) (another good resource is [here on stack overflow](https://stackoverflow.com/questions/60111361/how-to-download-a-file-from-google-drive-using-python-and-the-drive-api-v3)) which walk through using the Google Cloud Platform to create a project with the Drive v3 API enabled, setting up credentials, and downloading those credentials as a JSON file that can be used for authentication.
+#### Google OAuth 2.0 Flow
 
-Once you have downloaded your credentials JSON file, copy the content of that JSON and flatten it all into a single line, then paste it as the value of the `GOOGLE_DRIVE_OAUTH_CREDS` in your `.env` file (copied from the [`.env-template`](src/.env-template) file provided in the src directory. )
+For the Google OAuth 2.0 Flow implementation, I followed [these steps](https://developers.google.com/drive/api/quickstart/python) (another good resource is [here on stack overflow](https://stackoverflow.com/questions/60111361/how-to-download-a-file-from-google-drive-using-python-and-the-drive-api-v3)) which walk through using the Google Cloud Platform to create a project with the Drive v3 API enabled, setting up credentials, and downloading those credentials as a JSON file that can be used for authentication.
 
-Doing it this way allows the centralization of the secret stuff; no need for a separate credentials.json vulnerability being stored in the project.
+##### Original Implementation - No Web App 
 
-As a side note, your credentials JSON should have the following structure:
+With the original non-web-app implementation, you would copy the content of that credentials JSON file and flatten it all into a single line, then paste it as the value of the `GOOGLE_DRIVE_OAUTH_CREDS` in your `.env` file (copied from the [`.env-template`](src/.env-template) file provided in the src directory. Doing it this way allows the centralization of the secret stuff; no need for a separate credentials.json vulnerability being stored in the project.
+
+The credentials JSON should have the following structure:
 
 ```
 {
@@ -75,15 +66,27 @@ and after flattening it for the `.env` file value, should look like:
 GOOGLE_DRIVE_OAUTH_CREDS={"web": {"client_id": "XXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com","project_id": "some-project-XYZABC","auth_uri": "https://accounts.google.com/o/oauth2/auth","token_uri": "https://oauth2.googleapis.com/token","auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs","client_secret": "XXXXXXXXXXXXXXXXXXXXXXXXX-YYYYYYY","redirect_uris": ["http://localhost:8000"],"javascript_origins": ["http://localhost:8000"]}}
 ```
 
-### Google Service Account
+##### New Implementation - Web App with Database
 
-This is honestly the better option in my opinion, as I'm a big fan of automation. OAuth flow is a bit more manual and requires direct user sign in & granting of access, but a service account can be fully prepped ahead of time. To implement the service account authentication option for the project, I basically just followed [these simple instructions from Ben James](https://blog.benjames.io/2020/09/13/authorise-your-python-google-drive-api-the-easy-way/).
+With the web-app approach, there is no `.env` file or `credentials.json` file, but rather this credentials JSON data is stored as a JSONField of the AdministrationSettings model in the database such that an admin can use the Django Admin view to configure their OAuth client by simply pasting their value into a form and saving. This did require some refactoring in that the app needs to now read from the database to obtain the credentials rather than reading from a local JSON file in the file system.
 
-### SharePoint Upload
+### Need for Speed
 
-The SharePoint Uploader uses [the SharePoint App-Only permission model](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) to authenticate against SharePoint and manage file uploads. I followed the instructions in the linked article to create the client ID and client secret for the SharePoint Uploader application. These are respectively stored in the `SHAREPOINT_APP_CLIENT_ID` and `SHAREPOINT_APP_CLIENT_SECRET` environment variables loaded in from the `.env` file which you need to populate with your own values (by copying [`.env-template`](src/.env-template) to your own `.env` file first) in order to run the project.
+This project leverages Python multithreading via the [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) class from the [concurrent.futures](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) package which offers a significant performance improvement over the previously attempted single-threaded approach for both downloading and uploading. In order to make interaction with the Google Drive v3 API thread-safe, I implemented the instructions found [here](https://github.com/googleapis/google-api-python-client/blob/main/docs/thread_safety.md). I didn't have to do anything special to make the SharePoint uploading thread-safe.
 
-## Mapping Sources to Destinations
+### Driving Migrations
+
+#### Original Implementation - No Web App 
+
+The non-web-app version of the project takes a provided JSON-formatted migration [map](src/map.json) (which maps sources in Google to destinations in SharePoint or OneDrive), and does the following for each migration in the JSON array:
+
+1. Builds an in-memory tree of the full Google drive source
+2. Using the in-memory tree, downloads a configurable-size batch of files from Google source with multithreading
+3. Triggers a SharePoint uploader to upload (with multithreading) that new batch of downloaded files to the specified target/destination SharePoint site's document library (with optional base folder)
+4. Removes the local files after SharePoint Uploader has finished its upload process
+5. Starts back over at step 2 with a new configurable-size batch of files that have not yet been downloaded
+
+##### JSON Migration Map Structure 
 
 To provide a map of your migration sources and destinations, use a `map.json` file stored in the [src](src/__init__.py) directory. The `map.json` file should have this structure:
 
@@ -115,6 +118,22 @@ To provide a map of your migration sources and destinations, use a `map.json` fi
     {...}, # another migration
 ]
 ```
+
+#### New Implementation - Web App and Database
+
+The web-app version of the project functions somewhat similarly, except there is no [map](src/map.json) file mapping out all of the migrations on the local file system. Instead, each user who is migrating data first selects their source and their destination, then a new Migration object is saved. They then run a scan of their source data, and only after the scan finishes they can start the actual migration of their data. The scan of the source data is what produces the tree of the source (step 1 in original implementation). In this case, it's not all housed in-memory, but rather is stored in a JSONField in the database as part of the migration. The migration process then proceeds to use that stored JSON to do the batch-based migration of the data. 
+
+A big complimentary benefit of this approach is that since we're first reading / listing items from the Google and SharePoint environment, we're able to use precise IDs of the items selected by the user rather than relying on names (which can be mistyped easily) to match against items. This has performance implications as well because, if you're only providing the name of an item you want to migrate, the app first needs to call an API to get the ID of an item whose name matches the provided name, and needs to prompt for confirmation before migrating to avoid migrating the wrong thing (with perhaps a similar or even matching name). 
+
+### SharePoint Upload
+#### Original Implementation - No Web App
+
+In the original non-web-app version of the project, the SharePoint Uploader uses [the SharePoint App-Only permission model](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) to authenticate against SharePoint and manage file uploads. I followed the instructions in the linked article to create the client ID and client secret for the SharePoint Uploader application. These are respectively stored in the `SHAREPOINT_APP_CLIENT_ID` and `SHAREPOINT_APP_CLIENT_SECRET` environment variables loaded in from the `.env` file which you need to populate with your own values (by copying [`.env-template`](src/.env-template) to your own `.env` file first) in order to run the project.
+
+This obviously means that these credentials are static and the application itself needs full access to handle content additions to the SharePoint environment and/or to the OneDrive of each user account. Not great. 
+
+#### New Implementation - Web App and Database 
+The new web-app version of the project does not use [the SharePoint App-Only permission model](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs). Instead, it uses the access token obtained during the user login to O365 (via OAuth 2.0 with MSAL for Python, which is also built using OIDC) to call endpoints of the Graph API to read sites, document libraries, folders, and upload content. Honestly, this approach is much simpler than the previous. 
 
 ## Environment Variables / Secrets
 
@@ -151,7 +170,6 @@ The following models are used by this web application:
 5. Select one SharePoint / OneDrive destination.
 6. Enqueue migration.
 7. View activity of migration as it is happening. Able to see if it has started. If using a queue (not decided on implementation yet), display how many migration jobs are ahead of your own. IDEAL: trigger migration would spin up a new AWS lambda for running migration process along with new EC2 instance for housing the intermediary files since they need to be first downloaded before reuploading to destination.
-
 
 ## Running Locally & Developing
 0. Install requirements with `pip install -r requirements.txt`
