@@ -6,16 +6,12 @@
 THE ABOVE IS DONE.
 
 ## Web App
-
-- DNS
-- Linode, or EC2 instance...
-- Twilio MSGing service with callback. Ask user if they want SMS notifications if admin has SMS notifs enabled. 
-- AWS EC2 & lambda provisioning?
-- Change Admin settings form to use password inputs
-- Change admin settings to use list component for list items, e.g. js origins and redirect URIs
-- establish ordered steps flow for setting up migration
-- Use AAD application setting to determine user provisioning from SSO
-- Make "confirm source selections" auto-redirect to next step instead of having to click another "Continue" button
-- Use S3 instead of file system. MVP status currently. 
-- Progress tracking? 
-- State changes - Scanning & Scan complete added to migrations list table. Listen with JS polling. Let "Scanned" be a state. Set that when scan complete. (Ready to migrate.)
+- DNS. Need to finalize the name. 
+- DONE. Linode, or EC2 instance 
+- Twilio messaging service with callback. Ask user if they want SMS notifications for migration if admin has SMS notifications enabled.
+- AWS EC2 & lambda provisioning - spin up S3 & lambda for each migration job instead of using local FS. MVP status currently. 
+- Change Admin settings form to use password inputs - currently using Django’s built-in admin form. Prettify JSONfield inputs. 
+- Use AAD application setting to determine user provisioning from SSO. Auto-provision = yes/no. Currently auto-provisions user if they successfully authenticate.
+- Progress tracking of migration. Not sure where to house this information. Would rather not make a DB call every time a file op finishes. Already have state polling, progress may be too granular. 
+- DONE. State changes - Scanning & Scan complete added to migrations list table. Listen with JS polling. Let "Scanned" be a state. Set that when scan complete
+- Dockerize application. Web app, Redis, Celery worker, Database. Perhaps an additional container that proxies requests to AWS for lambda and S3 provisioning on new migration jobs. 
