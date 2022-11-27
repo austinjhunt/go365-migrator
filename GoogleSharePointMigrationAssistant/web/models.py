@@ -1,8 +1,8 @@
 from django.db import models
-# https://docs.djangoproject.com/en/4.1/topics/i18n/translation/
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Profile(models.Model):
     class Meta:
@@ -11,6 +11,16 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     timezone = models.CharField(max_length=100, default="UTC")
 
+# signals allowing auto-creation & update of 
+# profiles when users are created/updated
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
 
 class Migration(models.Model):
     """ Store migration records for users """
