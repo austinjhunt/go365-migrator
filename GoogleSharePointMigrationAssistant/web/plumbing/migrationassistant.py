@@ -1,4 +1,5 @@
 import time 
+import shutil
 from celery import shared_task
 from .constants import *  
 from .sharepoint import SharePointUploader
@@ -9,6 +10,9 @@ from .notif.notifier import Notifier
 from ..models import Migration
 from django.contrib.auth.models import User
 from django.core.cache import cache as django_cache
+import logging 
+
+logger = logging.getLogger(__name__)
 
 def get_migration_from_cache(migration_id):
     migration = django_cache.get(f'migration-{migration_id}', None)
@@ -26,7 +30,7 @@ class MigrationAssistant(BaseUtil):
         user: User = None,
         m365_token_cache: dict = {}
         ): 
-        super().__init__(name=name, verbose=verbose)      
+        super().__init__(name=name, verbose=verbose, username=user.username)      
         self.migration = migration
         self.m365_token_cache = m365_token_cache
         self.google_credentials = google_credentials
@@ -70,7 +74,7 @@ class MigrationAssistant(BaseUtil):
         self.downloader.file_batch_size = fbs 
             
     def notify_completion(self): 
-        self.notifier = Notifier() 
+        self.notifier = Notifier(migration=self.migration)
         self.notifier.notify_completion(
             migration=self.migration,  
             num_files_migrated=self.downloader.num_files_downloaded,# FIXME: should be stored as part of migration data, not downloader
@@ -84,24 +88,22 @@ class MigrationAssistant(BaseUtil):
         Log files are going to get big. When migration is finished, upload 
         logs to the same destination, adjacent to the folder uploaded during migration. 
         """
-        self.info(f'Uploading logs in {LOG_FOLDER_PATH} to sharepoint and then deleting from local system')
+        self.info({
+            'upload_logs_to_destination': {
+                'log_folder_path': self.log_folder_path
+            }
+        })
         self.shutdown_logging()
         self.uploader.shutdown_logging()  
         self.notifier.shutdown_logging() 
-        if self.migration.target_type == 'sharepoint_folder':
-            self.uploader.configure(
-                migration=self.migration,
-                local_temp_dir=self.local_temp_dir,
-                use_multithreading=True
-            )
-            self.uploader.upload(local_folder_base_path=LOG_FOLDER_PATH) 
+        self.uploader.configure(
+            migration=self.migration,
+            use_multithreading=True
+        )
+        self.uploader.num_completed_uploads = 0
+        self.uploader.upload(local_folder_base_path=self.log_folder_path) 
 
-        elif self.migration.target_type == 'onedrive_folder': 
-            self.uploader.num_completed_uploads = 0 
-            self.uploader.upload(
-                local_folder_base_path=LOG_FOLDER_PATH
-            )  
-
+ 
     def migrate(self):
         start = time.time()
         response = self.downloader.migrate()
@@ -118,6 +120,18 @@ class MigrationAssistant(BaseUtil):
 
     def scan_data_source(self):
         return self.downloader.scan()
+
+
+def clear_logs(assistant: MigrationAssistant = None):
+    if assistant:
+        assistant.shutdown_logging()
+        assistant.uploader.shutdown_logging()
+        assistant.downloader.shutdown_logging() 
+    try:
+        shutil.rmtree(assistant.log_folder_path, ignore_errors=True)
+    except Exception as e:
+        logger.error({'clear_logs': {'error': e}})
+    time.sleep(1)
 
 @shared_task
 def scan_data_source(migration_id: int = 0, google_credentials: dict = {}, user_id: int = 0):
@@ -153,20 +167,10 @@ def migrate_data(migration_id: int = 0, google_credentials: dict = {}, user_id: 
     migration_response = assistant.migrate()
     migration.state = Migration.STATES.MIGRATION_COMPLETE
     migration.save()
+
+    assistant.upload_logs_to_destination()
+    clear_logs(assistant)
+
     # TODO: Save something to model for migration report 
     assistant.notify_completion()
     return migration_response
-
-
-# def clear_logs(assistant: MigrationAssistant = None):
-#     print('Clearing logs')
-#     if assistant:
-#         assistant.shutdown_logging()
-#         assistant.uploader.shutdown_logging()
-#         assistant.downloader.shutdown_logging() 
-#     try:
-#         shutil.rmtree(LOG_FOLDER_PATH, ignore_errors=True)
-#     except Exception as e:
-#         print(f'Failed to remove log directory {LOG_FOLDER_PATH}')
-#         print(e)
-#     time.sleep(1)

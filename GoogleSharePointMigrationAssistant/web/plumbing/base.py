@@ -1,15 +1,15 @@
 import logging 
 import os 
-from .constants import LOG_FOLDER_PATH
 from datetime import timedelta
 from pathlib import PurePath
 import math 
 
 class BaseUtil: 
-    def __init__(self, name: str = '', verbose: bool = False): 
+    def __init__(self, name: str = '', verbose: bool = False, username: str = '' ): 
         self.name = name
         self.verbose = verbose 
         self.setup_logging() 
+        self.log_folder_path = os.path.join(os.path.dirname(__file__), f'migration-logs-{username}')
 
     def less_than_4mb(self, bytes_size: int = 0): 
         bytes_in_4mb = 1024 * 1024 * 4
@@ -36,8 +36,8 @@ class BaseUtil:
         handlerStream = logging.StreamHandler()
         handlerStream.setFormatter(formatter) 
         self.logger.addHandler(handlerStream)  
-        os.makedirs(LOG_FOLDER_PATH, exist_ok=True) 
-        handlerFile = logging.FileHandler(f'{LOG_FOLDER_PATH}/{self.name}.log')
+        os.makedirs(self.log_folder_path, exist_ok=True) 
+        handlerFile = logging.FileHandler(f'{self.log_folder_path}/{self.name}.log')
         handlerFile.setFormatter(formatter) 
         self.logger.addHandler(handlerFile)  
         if self.verbose:

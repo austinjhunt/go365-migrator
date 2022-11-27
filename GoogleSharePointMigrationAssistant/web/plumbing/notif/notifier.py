@@ -10,10 +10,11 @@ from ...models import Migration, AdministrationSettings
 from ..base import BaseUtil
 
 class Notifier(BaseUtil): 
-    def __init__(self, name: str = 'Notifier'):
+    def __init__(self, name: str = 'Notifier', migration: Migration = None):
         super().__init__(
             name=name, 
-            verbose=False
+            verbose=False,
+            username=migration.user.username
             ) 
         config = cache.get('config', AdministrationSettings.objects.first())
         cache.set('config', config)

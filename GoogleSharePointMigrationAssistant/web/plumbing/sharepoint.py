@@ -19,7 +19,7 @@ class SharePointUploader(BaseUtil, GraphUtil):
                  verbose: bool = False,
                  name: str = 'SPUploader'):
 
-        super().__init__(name=name, verbose=verbose)
+        super().__init__(name=name, verbose=verbose, username=migration.user.username)
         self.migration = migration
         self.m365_token_cache = m365_token_cache
         self.use_multithreading = use_multithreading

@@ -18,7 +18,7 @@ class OneDriveUploader(BaseUtil, GraphUtil):
                  local_folder_base_path: str = '',
                  verbose: bool = False,
                  username: str = ''):
-        super().__init__(name, verbose)
+        super().__init__(name, verbose, username=username)
 
         self.username = username
         self.m365_token_cache = m365_token_cache
@@ -339,12 +339,16 @@ class OneDriveUploader(BaseUtil, GraphUtil):
                 remote_parent_folder_id=remote_parent_folder_id
             )
             if not response:
-                self.error('Folder was not uploaded')
+                self.error({
+                    'upload': {
+                        'error': f'folder not uploaded',
+                        'local_folder_base_path': local_folder_base_path,
+                        'remote_parent_folder_id': remote_parent_folder_id
+                    }
+                })
         else:
             self.error(f'{local_folder_base_path} is not a directory')
         while self._num_active_uploads > 0:
-            self.info(
-                f'Waiting for completion of active uploads ({self._num_active_uploads})')
+            self.info({'upload': {'self._num_active_uploads': self._num_active_uploads}})
             time.sleep(5)
-        self.info("All enqueued upload tasks complete. Upload finished.")
-
+        self.info({'upload': {'complete': 'all enqueued upload tasks complete'}})

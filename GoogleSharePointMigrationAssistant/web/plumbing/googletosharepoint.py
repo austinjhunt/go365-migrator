@@ -32,7 +32,7 @@ class GoogleToSharePoint(BaseUtil):
     migration: Migration = None, 
     google_credentials: dict = {},
     ): 
-        super().__init__(name=name, verbose=verbose)
+        super().__init__(name=name, verbose=verbose, username=migration.user.username)
         self.admin_config = AdministrationSettings.objects.first()
         self.migration = migration
         self.file_batch_size = file_batch_size
