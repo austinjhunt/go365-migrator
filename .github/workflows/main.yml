@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  testing_project:
+  Testing:
     runs-on: ubuntu-latest # operating system your code will run on
     steps:
       - name: Checkout code
@@ -21,11 +21,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run Database Migrations
+        env:
+          # Dummy secret value
+          SECRET_KEY: c48155301fef301d64dafb707c3e12c8fb2d9f3cf3fee6e51e
         run: |
           cd GoogleSharePointMigrationAssistant
           python manage.py makemigrations web 
           python manage.py migrate web
       - name: Run tests
+        env:
+          # Dummy secret value
+          SECRET_KEY: c48155301fef301d64dafb707c3e12c8fb2d9f3cf3fee6e51e
         run: |
           cd GoogleSharePointMigrationAssistant
           python manage.py test
