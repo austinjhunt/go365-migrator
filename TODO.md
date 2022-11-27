@@ -15,3 +15,4 @@ THE ABOVE IS DONE.
 - Progress tracking of migration. Not sure where to house this information. Would rather not make a DB call every time a file op finishes. Already have state polling, progress may be too granular. 
 - DONE. State changes - Scanning & Scan complete added to migrations list table. Listen with JS polling. Let "Scanned" be a state. Set that when scan complete
 - Dockerize application. Web app, Redis, Celery worker, Database. Perhaps an additional container that proxies requests to AWS for lambda and S3 provisioning on new migration jobs. 
+- Migrate the local migration-logs folder to the target after the migration job finishes. 
