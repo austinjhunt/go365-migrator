@@ -1,8 +1,12 @@
 # Google to SharePoint Migration Assistant (Python)
 
-Multithreaded, configurable, automated migration assistant for migrating files out of Google Drive into SharePoint. Built for a Vanderbilt University CS 6387 Topics in SWE: Security final project. Contextualized and tested with College of Charleston's enterprise level file migration in light of new Google-enforced storage quotas. Set up a Google project and a SharePoint application for authentication on both sides, and then simply define a JSON-formatted map from the Google source location(s) to the respective SharePoint target location(s), then run it and sip your coffee.
+This is a multithreaded, configurable, automated migration assistant for migrating files out of Google Drive into SharePoint Online or OneDrive for Business. It was built for a Vanderbilt University CS 6387 Topics in SWE: Security final project. The context for the project was College of Charleston's enterprise level file migration in light of new Google-enforced storage quotas starting in 2022. This is a problem that also affects a number of other universities, as seen in [these Google query results for `site:edu "google storage" "change" "data" "limit"`](https://www.google.com/search?q=site%3Aedu+%22google+storage%22+%22change%22+%22data%22+%22limit%22&oq=site%3Aedu+%22google+storage%22+%22change%22+%22data%22+%22limit%22+&aqs=chrome..69i57j69i58.11364j0j9&sourceid=chrome&ie=UTF-8)
 
-Also building with the option of deploying an enterprise web application allowing users to trigger these migrations themselves. I personally tried using Google's built-in Google Takeout integration for OneDrive on my CofC Google Account huntaj@g.cofc.edu and this did not work because the tool is not set up to recognize OneDrive for Business accounts. Screenshots below demonstrate this issue.
+This project started out with simple service-account based authentication without a web app, meaning some admin would have had to manually set up migrations for functional users, run them, monitor them, etc. I wanted to build something that could offload that responsibility to the functional user such that they could grant the application access to their data and start their own migration without (or with minimal) IT involvement. In other words, I wanted to build an app that used OAuth and [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) to perform migration operations on behalf of a signed in user. 
+
+With the service account approach, an admin would set up a Google project and a SharePoint application for authentication on both sides, and then define a JSON-formatted map (example in [map.json](src/map.json)) from the Google source location(s) to the respective SharePoint target location(s), then run it and sip their coffee.
+
+Before kicking off, I personally tried using Google's built-in Google Takeout integration for OneDrive on my CofC Google Account huntaj@g.cofc.edu and this did not work because the tool is not set up to recognize OneDrive for Business accounts. Screenshots below demonstrate this issue.
 
 First, I chose the OneDrive option when configuring Google Takeout.
 
@@ -14,14 +18,18 @@ Then, I received an error message stating that my account doesn't exist, as it's
 
 ## Why build this?
 
-We first attempted couple of large scale (approx 5 TB total) data migrations using the official [SharePoint Migration Manager for Google Workspace](https://docs.microsoft.com/en-US/sharepointmigration/mm-google-overview?WT.mc_id=365AdminCSH_spo). This tool comes with a nice web UI and the ability to run a read-only scan and then copy that scan over into a migrations list where it can then be queued up and run as a full migration. After running this tool with a couple of different use cases, we started hitting obstacles with the reporting. Specifically, certain files (files that are supposed to be migratable like images and documents) were being skipped despite the migration logs confirming successul migrations for those items. So, since the reporting was not accurately reporting the errors, we needed a tool for migrating data that produced accurate, detailed logging, that we could rely on.
+We first attempted couple of large scale (approx 5 TB total) data migrations using the official [SharePoint Migration Manager for Google Workspace](https://docs.microsoft.com/en-US/sharepointmigration/mm-google-overview?WT.mc_id=365AdminCSH_spo). This tool comes with a nice web UI and the ability to run a read-only scan and then copy that scan over into a migrations list where it can then be queued up and run as a full migration. After running this tool with a couple of different use cases, we started hitting obstacles with the reporting. Specifically, certain files (files that are supposed to be migratable like images and documents) were being skipped despite the migration logs confirming successul migrations for those items. So, since the reporting was not accurately reporting the errors, we needed a tool for migrating data that produced accurate, detailed logging that we could rely on.
 ![migration manager](img/spo-migration-manager.jpg)
 
-Moreover, we are not heavily staffed and having a way for users to self-enqueue their own file migrations would offload a load of effort from the central team. Having an organization-wide web app that offers users the ability to authorize and queue their own migrations from Google to OneDrive or SharePoint -- and view logs of those migrations themselves that they can provide if/when they request support -- would be a step up from having to manage all migrations centrally ourselves.
+Moreover, we are not heavily staffed and having a way for users to self-enqueue their own file migrations would offload a significant amount of work from the central team. Having an organization-wide web app that offers users the ability to authorize and queue their own migrations from Google to OneDrive or SharePoint -- and view logs of those migrations themselves that they can provide if/when they request support -- would be a step up from having to manage all migrations centrally ourselves. Plus, central management also means more of a bottleneck, which means more waiting for the functional users. 
 
-## Overview
+## Need for Speed
 
-The project takes your provided JSON-formatted migration map (i.e. mapping sources in Google to destinations in SharePoint), and does the following for each migration in the JSON array:
+This project leverages Python multithreading via the [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) class from the [concurrent.futures](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) package which offers a significant performance improvement over the previously attempted single-threaded approach for both downloading and uploading. In order to make interaction with the Google Drive v3 API thread-safe, I implemented the instructions found [here](https://github.com/googleapis/google-api-python-client/blob/main/docs/thread_safety.md). I didn't have to do anything special to make the SharePoint uploading thread-safe.
+
+## Without a Web App - the JSON-Driven Scripted Approach 
+
+The project takes your provided JSON-formatted migration [map](src/map.json) (i.e. mapping sources in Google to destinations in SharePoint), and does the following for each migration in the JSON array:
 
 1. Builds an in-memory tree of the full Google drive source
 2. Using the in-memory tree, downloads a configurable-size batch of files from Google source with multithreading
@@ -29,18 +37,12 @@ The project takes your provided JSON-formatted migration map (i.e. mapping sourc
 4. Removes the local files after SharePoint Uploader has finished its upload process
 5. Starts back over at step 2 with a new configurable-size batch of files that have not yet been downloaded
 
-Example JSON map: [src/map.json](src/map.json)
-
-## Need for Speed
-
-This project leverages Python multithreading via the [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) class from the [concurrent.futures](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) package which offers a significant performance improvement over the previously attempted single-threaded approach for both downloading and uploading. In order to make interaction with the Google Drive v3 API thread-safe, I implemented the instructions found [here](https://github.com/googleapis/google-api-python-client/blob/main/docs/thread_safety.md). I didn't have to do anything special to make the SharePoint uploading thread-safe.
-
 ## Authentication & Authorization
 
 Authenticating against Google can be done one of two ways:
 
-1. With a [service account](https://cloud.google.com/iam/docs/service-accounts) (which I recommend). This requires that the service account be granted access to each drive/folder being migrated ahead of the migration. You can do this by getting the data owner to Share the folder with the email address of the service account once you create one.
-2. With OAuth InstalledAppFlow. In this case, the app runs on behalf of a user and leverages the signed in user's access to the data to be migrated. Requires the user to be involved in the migration process. Also requires that you run the assistant in an environment that can open a web browser, since a web browser is needed for you to sign into your Google Account and grant access to the application.
+1. With a [service account](https://cloud.google.com/iam/docs/service-accounts) (which I recommend). This requires that the service account be granted access to each drive/folder being migrated ahead of the migration. You can do this by getting the data owner to Share the folder with the email address of the service account once you create one. The 
+2. With OAuth InstalledAppFlow. In this case, the app runs on behalf of a user and leverages the signed in user's access to the data to be migrated. Requires the user to be involved in the migration process. Also requires that you run the assistant in an environment that can open a web browser, since a web browser is needed for you to sign into your Google Account and grant access to the application. Google's OAuth 2.0 flow conforms to the Open ID Connect specification, meaning it can be used for both authentication and authorization. 
 
 ### Google OAuth
 
@@ -61,8 +63,8 @@ As a side note, your credentials JSON should have the following structure:
     "token_uri": "https://oauth2.googleapis.com/token",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     "client_secret": "XXXXXXXXXXXXXXXXXXXXXXXXX-YYYYYYY",
-    "redirect_uris": ["http://localhost:8080"],
-    "javascript_origins": ["http://localhost:8080"]
+    "redirect_uris": ["http://localhost:8000"],
+    "javascript_origins": ["http://localhost:8000"]
   }
 }
 ```
@@ -70,7 +72,7 @@ As a side note, your credentials JSON should have the following structure:
 and after flattening it for the `.env` file value, should look like:
 
 ```
-GOOGLE_DRIVE_OAUTH_CREDS={"web": {"client_id": "XXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com","project_id": "some-project-XYZABC","auth_uri": "https://accounts.google.com/o/oauth2/auth","token_uri": "https://oauth2.googleapis.com/token","auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs","client_secret": "XXXXXXXXXXXXXXXXXXXXXXXXX-YYYYYYY","redirect_uris": ["http://localhost:8080"],"javascript_origins": ["http://localhost:8080"]}}
+GOOGLE_DRIVE_OAUTH_CREDS={"web": {"client_id": "XXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com","project_id": "some-project-XYZABC","auth_uri": "https://accounts.google.com/o/oauth2/auth","token_uri": "https://oauth2.googleapis.com/token","auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs","client_secret": "XXXXXXXXXXXXXXXXXXXXXXXXX-YYYYYYY","redirect_uris": ["http://localhost:8000"],"javascript_origins": ["http://localhost:8000"]}}
 ```
 
 ### Google Service Account
