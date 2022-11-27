@@ -120,7 +120,7 @@ To provide a map of your migration sources and destinations, use a `map.json` fi
 
 To avoid including secret values in the repository while still allowing for the possibility of collaboration on a fairly large scale project, I've written [lastpass-pull-env.py](lastpass-pull-env.py) that uses the LastPass SDK to pull the contents of a (possibly shared) secure note into a local .gitignored .env file. To use this approach, store the note as `.env` inside a specific folder, e.g., "GITIGNORED\googleproject". Run the script, authenticate, and provide that folder path.
 
-## Running
+## Running the Migration Script with map.json
 
 Once you have populated the environment variables with your own unique values, and you have your `map.json` file set up with your own migration maps (as defined above), you can run the project with
 
@@ -151,3 +151,19 @@ The following models are used by this web application:
 5. Select one SharePoint / OneDrive destination.
 6. Enqueue migration.
 7. View activity of migration as it is happening. Able to see if it has started. If using a queue (not decided on implementation yet), display how many migration jobs are ahead of your own. IDEAL: trigger migration would spin up a new AWS lambda for running migration process along with new EC2 instance for housing the intermediary files since they need to be first downloaded before reuploading to destination.
+
+
+## Running Locally & Developing
+0. Install requirements with `pip install -r requirements.txt`
+1. Install [Redis](https://redis.io/docs/getting-started/installation/). 
+2. Set up the database with `python manage.py makemigrations && python manage.py migrate`
+3. Create a superuser `python manage.py createsuperuser`. Fill out the prompts. This is a user that will have access to the admin view. I recommend not using a username that matches your organization userPrincipalName (e.g. use something like 'admin' rather than 'myrealusername@myorganization.edu'). 
+4. In a terminal window, start a Redis server with `redis-server`. 
+5. In another terminal window, set up Sass. `cd` into the `style` directory. `cd GoogleSharePointMigrationAssistant/web/static/style`
+   1. `sass --watch main.scss:main.css`. This command will automatically detect changes to the .scss files and compile all of them into main.css, which is the main CSS file used by the web app. 
+6. In another terminal window, set up a Celery worker. This will be responsible for asynchronous task execution (e.g. scanning and migrating) so the user doesn't have to wait for these things to finish before getting a response: `python -m celery -A GoogleSharePointMigrationAssistant worker`
+7. Now, in another terminal window, run the Django web server. `python manage.py runserver`. This will start the web server on port 8000, which you can access with [https://localhost:8000](https://localhost:8000) in a web browser. 
+8. Go to [https://localhost:8000/admin](https://localhost:8000/admin), log in with your superuser account. Create a new "AdministrationSettings" object. Populate the fields as desired to set up connections with your Google OAuth client, Azure AD app registration, SMTP server, Twilio messaging service, etc. 
+9. Save those changes. Then, either log out or open a new incognito browser window, then try logging in using the O365 / Single-Sign-On option, and use your O365 account. This should allow you to log in to the application via O365 SSO, and it should create a new user for you with a local username and email matching the userPrincipalName of your identity in Azure AD. The local password is randomly initialized; you will not be logging in locally so there is no need to remember or store a password. Since this is the first time you are logging in, you should get prompted to authorize this app to access to some of your O365 data. If you approve, grant access. (If you don't, this app will not work.)
+10. You'll see a button prompting you to log into Google and authorize this app to access (read only) your Google data. Click that. If you approve, grant access. (If you don't, this app will not work.)
+11. After this point, the app will guide you through selecting a source and destination, then scanning, then starting the migration. 
