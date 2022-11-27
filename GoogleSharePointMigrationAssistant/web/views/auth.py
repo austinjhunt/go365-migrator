@@ -20,7 +20,6 @@ class CustomLoginView(FormView):
             next_url = "/"
         context['next'] = mark_safe(next_url)
         return context
-    # POST
 
     def form_valid(self, form):
         username = form.cleaned_data['username']
