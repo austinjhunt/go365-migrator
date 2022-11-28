@@ -1,4 +1,4 @@
-# Go365 - Automate your own data migration.
+# Planning a Cloud Architecture for Go365 Migrator
 
 OAuth/OIDC-based web application that allows functional users within an organization to enqueue their own data migrations from Google Drive to SharePoint Online or OneDrive for Business. Google Takeout does not offer these services.
 
