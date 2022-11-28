@@ -8,9 +8,9 @@ class BaseUtil:
     def __init__(self, name: str = '', verbose: bool = False, username: str = '' ): 
         self.name = name
         self.verbose = verbose 
-        self.setup_logging() 
         self.log_folder_path = os.path.join(os.path.dirname(__file__), f'migration-logs-{username}')
-
+        self.setup_logging() 
+        
     def less_than_4mb(self, bytes_size: int = 0): 
         bytes_in_4mb = 1024 * 1024 * 4
         res =  bytes_size < bytes_in_4mb 

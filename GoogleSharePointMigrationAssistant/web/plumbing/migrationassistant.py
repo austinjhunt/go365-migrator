@@ -47,7 +47,8 @@ class MigrationAssistant(BaseUtil):
         if self.migration.target_type == 'sharepoint_folder': 
             self.uploader = SharePointUploader(
                 migration=self.migration,
-                use_multithreading=False,
+                #use_multithreading=False,
+                use_multithreading=True,
                 verbose=verbose,
                 m365_token_cache=self.m365_token_cache
             ) 
@@ -95,7 +96,6 @@ class MigrationAssistant(BaseUtil):
         })
         self.shutdown_logging()
         self.uploader.shutdown_logging()  
-        self.notifier.shutdown_logging() 
         self.uploader.configure(
             migration=self.migration,
             use_multithreading=True
@@ -128,6 +128,7 @@ def clear_logs(assistant: MigrationAssistant = None):
         assistant.uploader.shutdown_logging()
         assistant.downloader.shutdown_logging() 
     try:
+        logger.info({'clear_logs': assistant.log_folder_path})
         shutil.rmtree(assistant.log_folder_path, ignore_errors=True)
     except Exception as e:
         logger.error({'clear_logs': {'error': e}})
@@ -169,8 +170,9 @@ def migrate_data(migration_id: int = 0, google_credentials: dict = {}, user_id: 
     migration.save()
 
     assistant.upload_logs_to_destination()
-    clear_logs(assistant)
 
     # TODO: Save something to model for migration report 
     assistant.notify_completion()
+    
+    clear_logs(assistant)
     return migration_response
